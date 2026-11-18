@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EroDesk | Profesyonel Masaüstü Yazılım Çözümleri & Akıllı Ekosistem</title>
-    <!-- Tailwind CSS CDN -->
+    <title>EroDesk | Yapay Zeka Destekli İşletme & Randevu Ekosistemi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -20,7 +19,6 @@
             }
         }
     </script>
-    <!-- Font Inter & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -29,852 +27,904 @@
         .tab-content.active { display: block; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300 selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-50 text-slate-900 dark:bg-[#0b0f19] dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
 
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
-    <!-- Navigation Header -->
-    <header class="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-[#0b0f19]/80 border-b border-slate-200 dark:border-slate-800/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <!-- Brand Logo -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
-                <div class="bg-gradient-to-br from-indigo-500 to-cyan-500 text-white p-2.5 rounded-2xl shadow-lg shadow-indigo-500/20 flex items-center justify-center font-black text-xl w-11 h-11">
-                    ED
+<!-- ÜST MENÜ (HEADER) -->
+<header class="sticky top-0 z-40 backdrop-blur-xl bg-white/85 dark:bg-[#0b0f19]/85 border-b border-slate-200 dark:border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/25">
+                <i class="fa-solid fa-layer-group text-lg"></i>
+            </div>
+            <div>
+                <div class="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white leading-none">EroDesk <span class="text-indigo-500">AI</span></div>
+                <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Akıllı İşletme &amp; Randevu Ekosistemi</div>
+            </div>
+        </div>
+
+        <nav class="hidden md:flex items-center space-x-2 bg-slate-100 dark:bg-slate-900/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <button id="tab-btn-home" onclick="switchTab('home')" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 shadow-sm transition">
+                <i class="fa-solid fa-house mr-1.5"></i>Ana Sayfa
+            </button>
+            <button id="tab-btn-ai" onclick="switchTab('ai')" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+                <i class="fa-solid fa-robot mr-1.5"></i>AI Randevu
+            </button>
+            <button id="tab-btn-packages" onclick="switchTab('packages')" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+                <i class="fa-solid fa-crown mr-1.5"></i>Paketler &amp; Satın Al
+            </button>
+            <button id="tab-btn-admin" onclick="switchTab('admin')" class="hidden nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-amber-500 hover:bg-amber-500/10 transition">
+                <i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Paneli
+            </button>
+        </nav>
+
+        <div class="flex items-center space-x-3">
+            <div id="sync-status-badge" class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-slate-200/70 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300">
+                <span id="sync-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span id="sync-label">Bağlanıyor...</span>
+            </div>
+
+            <div id="auth-actions" class="flex items-center space-x-2">
+                <button onclick="openModal('login-modal')" class="px-4 py-2 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Giriş Yap</button>
+                <button onclick="openModal('register-modal')" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 transition">Kayıt Ol</button>
+            </div>
+
+            <button id="user-pill" onclick="openModal('profile-modal')" class="hidden items-center space-x-2.5 pl-1.5 pr-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition">
+                <div id="nav-user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-emerald-500 text-white flex items-center justify-center text-xs font-bold">U</div>
+                <span id="nav-user-name" class="text-xs font-semibold">Kullanıcı</span>
+                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- 1. ANA SAYFA -->
+    <section id="tab-home" class="tab-content active space-y-12">
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-8 sm:p-14 border border-indigo-500/20 shadow-2xl">
+            <div class="max-w-3xl space-y-6">
+                <span class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <span>AdminDesk &amp; 7 Sektörel AI Uygulama ile Tam Entegre</span>
+                </span>
+                <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                    İşletmenizi <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">Yapay Zeka</span> ile 7/24 Yönetin
+                </h1>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    DentDeskAI, HairDeskAI, BarberDeskAI, SkinDeskAI, VetDeskAI, TheraDeskAI ve LawDeskAI masaüstü uygulamalarıyla doğrudan senkronize çalışan akıllı randevu ve müşteri yönetimi platformu.
+                </p>
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <button onclick="switchTab('ai')" class="px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-xl shadow-indigo-600/30 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span>AI ile Randevu Oluştur</span>
+                    </button>
+                    <button onclick="switchTab('packages')" class="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/15 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-crown text-amber-400"></i>
+                        <span>Paketleri İncele</span>
+                    </button>
                 </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="flex items-center justify-between mb-6">
                 <div>
-                    <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
-                        EroDesk
-                    </span>
-                    <span class="block text-[10px] text-slate-500 dark:text-slate-400 font-mono tracking-wider uppercase">erodesk.com.tr</span>
+                    <h2 class="text-2xl font-bold">Entegre Sektörel Uygulamalarımız</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Web sitesinden gönderilen her mesaj doğrudan ilgili işletmenin masaüstü gelen kutusuna düşer.</p>
                 </div>
             </div>
-
-            <!-- Navigation Tabs -->
-            <nav class="hidden md:flex items-center space-x-1 bg-slate-100 dark:bg-slate-900/50 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800/60 text-sm font-medium">
-                <button onclick="switchTab('home')" id="tab-btn-home" class="nav-tab-btn px-4 py-2 rounded-xl transition font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 shadow-sm">
-                    <i class="fa-solid fa-house mr-2"></i>Ana Sayfa
-                </button>
-                <button onclick="switchTab('businesses')" id="tab-btn-businesses" class="nav-tab-btn px-4 py-2 rounded-xl transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                    <i class="fa-solid fa-store mr-2"></i>İşletmeler
-                </button>
-                <button onclick="switchTab('ai-appointment')" id="tab-btn-ai-appointment" class="nav-tab-btn px-4 py-2 rounded-xl transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 flex items-center">
-                    <i class="fa-solid fa-robot mr-2 text-cyan-500 dark:text-cyan-400"></i>AI Randevu
-                    <span class="ml-1.5 px-1.5 py-0.2 bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 text-[10px] rounded-full font-mono">Aktif</span>
-                </button>
-                <button onclick="switchTab('pricing')" id="tab-btn-pricing" class="nav-tab-btn px-4 py-2 rounded-xl transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                    <i class="fa-solid fa-tag mr-2"></i>Satın Al
-                </button>
-            </nav>
-
-            <!-- Actions & Auth State -->
-            <div class="flex items-center space-x-3">
-                <!-- Theme Toggle Button -->
-                <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800/50 hover:bg-slate-300 dark:hover:bg-slate-700 transition text-slate-700 dark:text-slate-300" title="Tema Değiştir">
-                    <i id="theme-icon" class="fa-solid fa-sun"></i>
-                </button>
-
-                <!-- Auth Section Container -->
-                <div id="auth-actions" class="flex items-center space-x-2">
-                    <button onclick="openModal('login-modal')" class="px-4 py-2 text-sm font-medium rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
-                        Giriş Yap
-                    </button>
-                    <button onclick="openModal('register-modal')" class="px-4 py-2 text-sm font-medium rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition">
-                        Kayıt Ol
-                    </button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div onclick="startCategoryFlow('klinikler')" class="cursor-pointer p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 hover:border-indigo-500 transition">
+                    <div class="w-11 h-11 rounded-2xl bg-sky-500/15 text-sky-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-tooth"></i></div>
+                    <h3 class="font-bold text-base">DentDeskAI</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Diş Klinikleri &amp; Poliklinikler</p>
                 </div>
-
-                <!-- User Profile Pill -->
-                <div id="user-pill" class="hidden items-center space-x-3 pl-2 cursor-pointer bg-slate-200/60 dark:bg-slate-900/60 px-3 py-1.5 rounded-2xl border border-slate-300 dark:border-slate-800" onclick="openModal('profile-modal')">
-                    <img id="nav-user-avatar" src="https://placehold.co/100x100/4f46e5/ffffff?text=U" class="w-8 h-8 rounded-full object-cover border-2 border-indigo-500" alt="Profil">
-                    <div class="hidden lg:block text-left">
-                        <div id="nav-user-name" class="text-xs font-semibold text-slate-900 dark:text-slate-100">Kullanıcı</div>
-                        <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">Aktif Hesap</div>
-                    </div>
+                <div onclick="startCategoryFlow('barberdesk')" class="cursor-pointer p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 hover:border-indigo-500 transition">
+                    <div class="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-user-tie"></i></div>
+                    <h3 class="font-bold text-base">BarberDeskAI</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Erkek Kuaförleri &amp; Barber</p>
+                </div>
+                <div onclick="startCategoryFlow('hairdesk')" class="cursor-pointer p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 hover:border-indigo-500 transition">
+                    <div class="w-11 h-11 rounded-2xl bg-pink-500/15 text-pink-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-scissors"></i></div>
+                    <h3 class="font-bold text-base">HairDeskAI</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kadın Kuaförleri &amp; Tasarım</p>
+                </div>
+                <div onclick="startCategoryFlow('skindesk')" class="cursor-pointer p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 hover:border-indigo-500 transition">
+                    <div class="w-11 h-11 rounded-2xl bg-teal-500/15 text-teal-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <h3 class="font-bold text-base">SkinDeskAI</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Güzellik &amp; Cilt Bakım Salonları</p>
                 </div>
             </div>
         </div>
-        <!-- Mobile Navigation Bar -->
-        <div class="md:hidden flex items-center justify-around border-t border-slate-200 dark:border-slate-800/50 py-2.5 bg-white/90 dark:bg-[#0b0f19]/90 text-xs">
-            <button onclick="switchTab('home')" class="mobile-tab-btn flex flex-col items-center text-indigo-600 dark:text-indigo-400" id="m-tab-home">
-                <i class="fa-solid fa-house text-sm mb-1"></i><span>Ana Sayfa</span>
-            </button>
-            <button onclick="switchTab('businesses')" class="mobile-tab-btn flex flex-col items-center text-slate-500 dark:text-slate-400" id="m-tab-businesses">
-                <i class="fa-solid fa-store text-sm mb-1"></i><span>İşletmeler</span>
-            </button>
-            <button onclick="switchTab('ai-appointment')" class="mobile-tab-btn flex flex-col items-center text-slate-500 dark:text-slate-400" id="m-tab-ai-appointment">
-                <i class="fa-solid fa-robot text-sm mb-1"></i><span>AI Randevu</span>
-            </button>
-            <button onclick="switchTab('pricing')" class="mobile-tab-btn flex flex-col items-center text-slate-500 dark:text-slate-400" id="m-tab-pricing">
-                <i class="fa-solid fa-tag text-sm mb-1"></i><span>Satın Al</span>
-            </button>
+    </section>
+
+    <!-- 2. AI RANDEVU (ADIM 1: KATEGORİ -> ADIM 2: İŞLETME -> ADIM 3: AI BOT) -->
+    <section id="tab-ai" class="tab-content space-y-8">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold">AI Randevu Asistanı</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">1. Kategori Seçin &rarr; 2. İşletme Seçin &rarr; 3. Yapay Zeka ile Randevunuzu Oluşturun</p>
+            </div>
+            <div class="flex items-center space-x-2 text-xs font-semibold">
+                <span id="step-pill-1" class="px-3 py-1.5 rounded-full bg-indigo-600 text-white">1. Kategori</span>
+                <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
+                <span id="step-pill-2" class="px-3 py-1.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500">2. İşletme</span>
+                <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
+                <span id="step-pill-3" class="px-3 py-1.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500">3. AI Asistan</span>
+            </div>
         </div>
-    </header>
 
-    <!-- Main Content Area with Multi-Tab Architecture -->
-    <main class="flex-grow">
-        
-        <!-- TAB 1: ANA SAYFA -->
-        <section id="tab-home" class="tab-content active">
-            <!-- Hero Section -->
-            <div class="relative overflow-hidden py-20 lg:py-28 border-b border-slate-200 dark:border-slate-800/50">
-                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-transparent pointer-events-none"></div>
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-                    <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-semibold mb-6 shadow-sm">
-                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                        <span>erodesk.com.tr | Profesyonel Yazılım Çözümleri</span>
-                    </div>
-                    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight mb-6 text-slate-900 dark:text-slate-100">
-                        İşletmeniz İçin Profesyonel <span class="bg-gradient-to-r from-indigo-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">Masaüstü Yazılımları</span>
-                    </h1>
-                    <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10">
-                        Klinikler, kuaförler ve güzellik merkezleri için geliştirilen yerel otomasyonlar ve akıllı randevu sistemleri.
-                    </p>
-                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                        <button onclick="switchTab('businesses')" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-xl shadow-indigo-600/30 transition flex items-center justify-center space-x-2">
-                            <span>İşletmeleri & Vitrini Keşfet</span>
-                            <i class="fa-solid fa-arrow-right text-xs"></i>
-                        </button>
-                        <button onclick="switchTab('pricing')" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold transition flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-tag text-teal-500 dark:text-teal-400"></i>
-                            <span>Yazılım Paketlerini İncele</span>
-                        </button>
-                    </div>
-                </div>
+        <!-- ADIM 1: KATEGORİ SEÇİMİ -->
+        <div id="ai-step-1" class="space-y-4">
+            <h3 class="text-sm font-bold text-slate-600 dark:text-slate-300">Adım 1: Hizmet Kategorisi Seçin</h3>
+            <div id="ai-category-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        </div>
+
+        <!-- ADIM 2: İŞLETME SEÇİMİ -->
+        <div id="ai-step-2" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-slate-600 dark:text-slate-300">
+                    Adım 2: <span id="selected-cat-title" class="text-indigo-500">Kategori</span> İşletmeleri
+                </h3>
+                <button onclick="backToStep(1)" class="text-xs font-semibold text-indigo-500 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i>Kategorilere Dön</button>
+            </div>
+            <div id="ai-business-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </div>
+
+        <!-- ADIM 3: CANLI AI CHAT -->
+        <div id="ai-step-3" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <button onclick="backToStep(2)" class="text-xs font-semibold text-indigo-500 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i>İşletmelere Dön</button>
+                <button onclick="resetChat()" class="text-xs font-semibold text-slate-500 hover:text-rose-500"><i class="fa-solid fa-rotate-right mr-1"></i>Sohbeti Sıfırla</button>
             </div>
 
-            <!-- Software Suites Overview -->
-            <div class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight mb-4 text-slate-900 dark:text-slate-100">Geliştirdiğimiz Yazılım Çözümleri</h2>
-                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">Sektörünüze özel tasarlanmış yüksek performanslı masaüstü uygulamaları.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="p-8 rounded-3xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 transition shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl mb-6 shadow-inner">
-                            <i class="fa-solid fa-tooth"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-3 text-slate-900 dark:text-slate-100">DentDesk & AI</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">Diş klinikleri ve muayenehaneler için hasta takip, tedavi planı ve akıllı randevu yönetimi.</p>
-                    </div>
-
-                    <div class="p-8 rounded-3xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/50 transition shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center text-xl mb-6 shadow-inner">
-                            <i class="fa-solid fa-spray-can-sparkles"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-3">SkinDesk & HairDesk</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">Güzellik salonları, cilt bakım merkezleri ve kuaförler için profesyonel müşteri ve işlem takibi.</p>
-                    </div>
-
-                    <div class="p-8 rounded-3xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-teal-500/50 transition shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center text-xl mb-6 shadow-inner">
-                            <i class="fa-solid fa-user-tie"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-3">BarberDesk & HairDesk</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">Erkek ve kadın kuaförleri için sıra, randevu ve personel prim otomasyonu.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- TAB 2: İŞLETMELER -->
-        <section id="tab-businesses" class="tab-content py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12">
-                    <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold border border-indigo-500/20 mb-3 inline-block">Bölgesel İşletme Vitrini</span>
-                    <h2 class="text-3xl font-extrabold tracking-tight mb-3 text-slate-900 dark:text-slate-100">İşletme Rehberi</h2>
-                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">İşletmeleri ve ekran vitrinlerini görmek için yukarıdan yaşadığınız il ve ilçe seçimini yapınız.</p>
-                </div>
-
-                <!-- Location Selectors (Manisa / Salihli only) -->
-                <div class="max-w-2xl mx-auto p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl mb-12 transition-colors">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">İl Seçiniz</label>
-                            <select id="select-city" onchange="handleCityChange()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition text-slate-900 dark:text-slate-200">
-                                <option value="">İl Seçin...</option>
-                                <option value="manisa">Manisa</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">İlçe Seçiniz</label>
-                            <select id="select-district" onchange="handleDistrictChange()" disabled class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-900 dark:text-slate-200">
-                                <option value="">Önce İl Seçin...</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Category Section -->
-                <div id="category-section" class="hidden transition-all duration-500">
-                    <div class="flex flex-wrap justify-between items-center mb-8 gap-4">
-                        <div class="flex flex-wrap gap-3">
-                            <button onclick="filterCategory('klinik')" id="btn-cat-klinik" class="category-btn px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-medium hover:border-indigo-500 transition flex items-center space-x-2 shadow-sm text-sm">
-                                <i class="fa-solid fa-tooth text-indigo-500"></i>
-                                <span>Diş Klinikleri</span>
-                            </button>
-                            <button onclick="filterCategory('erkek')" id="btn-cat-erkek" class="category-btn px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-medium hover:border-indigo-500 transition flex items-center space-x-2 shadow-sm text-sm">
-                                <i class="fa-solid fa-user-tie text-blue-500"></i>
-                                <span>Erkek Kuaförleri</span>
-                            </button>
-                            <button onclick="filterCategory('kadin')" id="btn-cat-kadin" class="category-btn px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-medium hover:border-indigo-500 transition flex items-center space-x-2 shadow-sm text-sm">
-                                <i class="fa-solid fa-scissors text-pink-500"></i>
-                                <span>Kadın Kuaförleri</span>
-                            </button>
-                            <button onclick="filterCategory('guzellik')" id="btn-cat-guzellik" class="category-btn px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-medium hover:border-indigo-500 transition flex items-center space-x-2 shadow-sm text-sm">
-                                <i class="fa-solid fa-wand-magic-sparkles text-teal-500"></i>
-                                <span>Güzellik Salonları</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Business Cards Grid -->
-                    <div id="business-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
-                </div>
-
-                <!-- Initial Notice -->
-                <div id="showcase-placeholder" class="text-center py-20 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl max-w-3xl mx-auto bg-white/50 dark:bg-slate-900/50">
-                    <i class="fa-solid fa-map-location-dot text-5xl text-slate-400 mb-4"></i>
-                    <p class="text-slate-600 dark:text-slate-400 text-base">İşletmeleri ve ekran vitrinlerini görmek için yukarıdan <span class="text-indigo-600 dark:text-indigo-400 font-bold">yaşadığınız il ve ilçe seçimini</span> yapınız.</p>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- TAB 3: AI RANDEVU ASİSTANI -->
-        <section id="tab-ai-appointment" class="tab-content py-16">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-8">
-                    <span class="px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-semibold border border-cyan-500/20 mb-3 inline-block">Yapay Zeka Asistanı</span>
-                    <h2 class="text-3xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-slate-100">Akıllı Randevu Botu</h2>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm">Seçtiğiniz işletme ve sisteme özel yapay zeka ile anında randevu oluşturun.</p>
-                </div>
-
-                <!-- Selected Business Banner in AI Chat -->
-                <div id="ai-active-business-banner" class="mb-6 p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-between text-sm">
+            <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[540px]">
+                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
-                            <i class="fa-solid fa-store"></i>
-                        </div>
-                        <div>
-                            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-mono">Seçilen İşletme</div>
-                            <div id="ai-banner-biz-name" class="font-bold text-slate-900 dark:text-slate-100">Henüz işletme seçilmedi (Genel Mod)</div>
-                        </div>
-                    </div>
-                    <button onclick="switchTab('businesses')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition">
-                        İşletme Değiştir
-                    </button>
-                </div>
-
-                <!-- Chat Container -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[550px] transition-colors">
-                    <div class="bg-slate-100 dark:bg-slate-950 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold text-lg border border-cyan-500/20">
-                                <i class="fa-solid fa-robot"></i>
-                            </div>
-                            <div>
-                                <h3 id="ai-chat-title" class="text-sm font-bold text-slate-900 dark:text-slate-100">DentDeskAI Randevu Asistanı</h3>
-                                <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono flex items-center">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1.5 animate-pulse"></span>
-                                    Aktif ve Hazır
-                                </p>
-                            </div>
-                        </div>
-                        <button onclick="resetChat()" class="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 transition">
-                            Sohbeti Sıfırla
-                        </button>
-                    </div>
-
-                    <!-- Chat Messages Area -->
-                    <div id="chat-messages" class="flex-grow p-6 overflow-y-auto space-y-4 text-sm bg-slate-50/50 dark:bg-slate-900/50">
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-shrink-0 text-xs border border-cyan-500/20">AI</div>
-                            <div id="ai-initial-msg" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 max-w-lg text-slate-800 dark:text-slate-300 shadow-sm">
-                                Merhaba! DentDeskAI klinik asistanıyım. "Saat 2 boş mu?" diyerek randevu sürecini başlatabilirsiniz.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Chat Input Area -->
-                    <div class="p-4 bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-                        <form onsubmit="handleChatSubmit(event)" class="flex items-center space-x-2">
-                            <input type="text" id="chat-input" placeholder="Yazmaya başlayın..." class="flex-grow bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition text-slate-900 dark:text-slate-100">
-                            <button type="submit" class="px-6 py-3.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold shadow-lg shadow-cyan-600/30 transition">
-                                <i class="fa-solid fa-paper-plane"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 4: SATIN AL / LİSANS -->
-        <section id="tab-pricing" class="tab-content py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <span class="px-3 py-1 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 text-xs font-semibold border border-teal-500/20 mb-3 inline-block">Lisans & Paketler</span>
-                    <h2 class="text-3xl font-extrabold tracking-tight mb-3 text-slate-900 dark:text-slate-100">Yazılım Fiyat Listesi</h2>
-                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">İhtiyacınıza uygun profesyonel yazılım paketini seçin, anında kullanmaya başlayın.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-                    <!-- DentDeskAI -->
-                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl mb-4">
-                                <i class="fa-solid fa-tooth"></i>
-                            </div>
-                            <h3 class="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100">DentDeskAI</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Diş Klinikleri ve Muayenehaneler</p>
-                            <div class="text-3xl font-extrabold mb-6 text-slate-900 dark:text-slate-100">₺2.499<span class="text-xs font-normal text-slate-600 dark:text-slate-400"> / ay</span></div>
-                            <ul class="space-y-3 text-xs text-slate-700 dark:text-slate-300 mb-6">
-                                <li class="flex items-center"><i class="fa-solid fa-check text-indigo-500 mr-2"></i>Sınırsız Hasta Takibi</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-indigo-500 mr-2"></i>Akıllı Diş Kliniği AI Asistanı</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-indigo-500 mr-2"></i>Otomatik Randevu Bildirimleri</li>
-                            </ul>
-                        </div>
-                        <button onclick="openPurchaseModal('DentDeskAI', '₺2.499 / ay')" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow transition">
-                            Hemen Satın Al
-                        </button>
-                    </div>
-
-                    <!-- SkinDeskAI -->
-                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center text-xl mb-4">
-                                <i class="fa-solid fa-spray-can-sparkles"></i>
-                            </div>
-                            <h3 class="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100">SkinDeskAI</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Güzellik ve Cilt Bakım Merkezleri</p>
-                            <div class="text-3xl font-extrabold mb-6 text-slate-900 dark:text-slate-100">₺1.999<span class="text-xs font-normal text-slate-600 dark:text-slate-400"> / ay</span></div>
-                            <ul class="space-y-3 text-xs text-slate-700 dark:text-slate-300 mb-6">
-                                <li class="flex items-center"><i class="fa-solid fa-check text-teal-500 mr-2"></i>Seans ve Paket Takibi</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-teal-500 mr-2"></i>Güzellik Salonu AI Asistanı</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-teal-500 mr-2"></i>Müşteri Hatırlatıcıları</li>
-                            </ul>
-                        </div>
-                        <button onclick="openPurchaseModal('SkinDeskAI', '₺1.999 / ay')" class="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs shadow transition">
-                            Hemen Satın Al
-                        </button>
-                    </div>
-
-                    <!-- BarberDeskAI -->
-                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl mb-4">
-                                <i class="fa-solid fa-user-tie"></i>
-                            </div>
-                            <h3 class="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100">BarberDeskAI</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Erkek Kuaförleri ve Berberler</p>
-                            <div class="text-3xl font-extrabold mb-6 text-slate-900 dark:text-slate-100">₺1.499<span class="text-xs font-normal text-slate-600 dark:text-slate-400"> / ay</span></div>
-                            <ul class="space-y-3 text-xs text-slate-700 dark:text-slate-300 mb-6">
-                                <li class="flex items-center"><i class="fa-solid fa-check text-blue-500 mr-2"></i>Koltuk ve Sıra Yönetimi</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-blue-500 mr-2"></i>Erkek Kuaförü AI Asistanı</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-blue-500 mr-2"></i>Personel Prim Raporlama</li>
-                            </ul>
-                        </div>
-                        <button onclick="openPurchaseModal('BarberDeskAI', '₺1.499 / ay')" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow transition">
-                            Hemen Satın Al
-                        </button>
-                    </div>
-
-                    <!-- HairDeskAI -->
-                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="w-12 h-12 rounded-2xl bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center text-xl mb-4">
-                                <i class="fa-solid fa-scissors"></i>
-                            </div>
-                            <h3 class="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100">HairDeskAI</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Kadın Kuaförleri ve Güzellik</p>
-                            <div class="text-3xl font-extrabold mb-6 text-slate-900 dark:text-slate-100">₺1.799<span class="text-xs font-normal text-slate-600 dark:text-slate-400"> / ay</span></div>
-                            <ul class="space-y-3 text-xs text-slate-700 dark:text-slate-300 mb-6">
-                                <li class="flex items-center"><i class="fa-solid fa-check text-pink-500 mr-2"></i>Özel İşlem & Boya Takibi</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-pink-500 mr-2"></i>Kadın Kuaförü AI Asistanı</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-pink-500 mr-2"></i>Online Randevu Paneli</li>
-                            </ul>
-                        </div>
-                        <button onclick="openPurchaseModal('HairDeskAI', '₺1.799 / ay')" class="w-full py-3 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-semibold text-xs shadow transition">
-                            Hemen Satın Al
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-[#0b0f19] border-t border-slate-200 dark:border-slate-800/80 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-600 dark:text-slate-400 gap-4">
-            <div class="flex items-center space-x-2">
-                <span class="font-bold text-slate-900 dark:text-slate-100">EroDesk</span>
-                <span>© 2026 erodesk.com.tr - Tüm hakları saklıdır.</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <span>Manisa / Salihli Bölge Bayii</span>
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>Sistem Aktif</span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript Application Logic -->
-    <script>
-        // Mock Data: Businesses in Manisa / Salihli
-        const businessesData = {
-            klinik: [
-                { id: 'dent-1', name: 'Salihli Dent Diş Sağlığı Kliniği', category: 'klinik', phone: '0236 713 00 00', address: ' Mithatpaşa Mah. Atatürk Cad. No:45, Salihli/Manisa', image: 'https://placehold.co/600x400/4f46e5/ffffff?text=Salihli+Dent' },
-                { id: 'dent-2', name: 'Gülümse Ağız ve Diş Sağlığı Merkezi', category: 'klinik', phone: '0236 714 11 22', address: ' Kurtuluş Mah. Şehitler Cad. No:12, Salihli/Manisa', image: 'https://placehold.co/600x400/6366f1/ffffff?text=Gulumse+Dis' }
-            ],
-            erkek: [
-                { id: 'barber-1', name: 'Elite Barber Club', category: 'erkek', phone: '0236 715 33 44', address: ' Zafer Mah. Belediye Sk. No:8, Salihli/Manisa', image: 'https://placehold.co/600x400/2563eb/ffffff?text=Elite+Barber' },
-                { id: 'barber-2', name: 'Karizma Erkek Kuaförü', category: 'erkek', phone: '0236 716 55 66', address: ' Mithatpaşa Mah. 15 Eylül Cad. No:22, Salihli/Manisa', image: 'https://placehold.co/600x400/3b82f6/ffffff?text=Karizma+Kuafor' }
-            ],
-            kadin: [
-                { id: 'hair-1', name: 'Moda Saç Tasarım & Güzellik', category: 'kadin', phone: '0236 717 77 88', address: ' Kurtuluş Mah. Garaj Sk. No:5, Salihli/Manisa', image: 'https://placehold.co/600x400/db2777/ffffff?text=Moda+Sac+Tasarim' },
-                { id: 'hair-2', name: 'Papatya Kadın Kuaförü', category: 'kadin', phone: '0236 718 99 00', address: ' Şehitler Mah. Park Cad. No:19, Salihli/Manisa', image: 'https://placehold.co/600x400/ec4899/ffffff?text=Papatya+Kuafor' }
-            ],
-            guzellik: [
-                { id: 'skin-1', name: 'Salihli Life Güzellik & Cilt Bakım', category: 'guzellik', phone: '0236 719 22 33', address: ' Zafer Mah. Çevre Yolu Cad. No:88, Salihli/Manisa', image: 'https://placehold.co/600x400/0d9488/ffffff?text=Salihli+Life' },
-                { id: 'skin-2', name: 'Aura Estetik & Lazer Merkezi', category: 'guzellik', phone: '0236 720 44 55', address: ' Mithatpaşa Mah. Stadyum Cad. No:34, Salihli/Manisa', image: 'https://placehold.co/600x400/14b8a6/ffffff?text=Aura+Estetik' }
-            ]
-        };
-
-        let currentActiveTab = 'home';
-        let selectedCategory = null;
-        let selectedBusiness = null;
-        let currentUser = null; // { name, email, role: 'admin'|'user' }
-
-        // Initialize App on Load
-        window.onload = function() {
-            // Check saved user session
-            const savedUser = localStorage.getItem('erodesk_current_user');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                updateAuthUI();
-            }
-        };
-
-        // Tab Switcher
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-
-            document.querySelectorAll('.nav-tab-btn').forEach(btn => {
-                btn.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-500/10', 'shadow-sm');
-                btn.classList.add('text-slate-600', 'dark:text-slate-400');
-            });
-            const targetBtn = document.getElementById('tab-btn-' + tabId);
-            if(targetBtn) {
-                targetBtn.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-500/10', 'shadow-sm');
-                targetBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
-            }
-
-            document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
-                btn.classList.remove('text-indigo-600', 'dark:text-indigo-400');
-                btn.classList.add('text-slate-500', 'dark:text-slate-400');
-            });
-            const targetMBtn = document.getElementById('m-tab-' + tabId);
-            if(targetMBtn) {
-                targetMBtn.classList.add('text-indigo-600', 'dark:text-indigo-400');
-                targetMBtn.classList.remove('text-slate-500', 'dark:text-slate-400');
-            }
-
-            currentActiveTab = tabId;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Theme Toggle
-        function toggleTheme() {
-            const html = document.documentElement;
-            const icon = document.getElementById('theme-icon');
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                icon.className = 'fa-solid fa-moon';
-                showToast('Açık tema aktif edildi.', 'info');
-            } else {
-                html.classList.add('dark');
-                icon.className = 'fa-solid fa-sun';
-                showToast('Koyu tema aktif edildi.', 'info');
-            }
-        }
-
-        // Location Handlers (Manisa / Salihli)
-        function handleCityChange() {
-            const city = document.getElementById('select-city').value;
-            const districtSelect = document.getElementById('select-district');
-            districtSelect.innerHTML = '<option value="">İlçe Seçin...</option>';
-
-            if (city === 'manisa') {
-                districtSelect.innerHTML += '<option value="salihli">Salihli</option>';
-                districtSelect.disabled = false;
-            } else {
-                districtSelect.disabled = true;
-                document.getElementById('category-section').classList.add('hidden');
-                document.getElementById('showcase-placeholder').classList.remove('hidden');
-            }
-        }
-
-        function handleDistrictChange() {
-            const district = document.getElementById('select-district').value;
-            if (district === 'salihli') {
-                document.getElementById('showcase-placeholder').classList.add('hidden');
-                document.getElementById('category-section').classList.remove('hidden');
-                filterCategory('klinik'); // Default category
-                showToast('Salihli işletmeleri yüklendi.', 'success');
-            } else {
-                document.getElementById('category-section').classList.add('hidden');
-                document.getElementById('showcase-placeholder').classList.remove('hidden');
-            }
-        }
-
-        // Category Filter & Business Render
-        function filterCategory(catKey) {
-            selectedCategory = catKey;
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('border-indigo-500', 'bg-indigo-500/10', 'text-indigo-600', 'dark:text-indigo-400');
-            });
-            const activeBtn = document.getElementById('btn-cat-' + catKey);
-            if (activeBtn) {
-                activeBtn.classList.add('border-indigo-500', 'bg-indigo-500/10', 'text-indigo-600', 'dark:text-indigo-400');
-            }
-
-            const grid = document.getElementById('business-grid');
-            grid.innerHTML = '';
-            const list = businessesData[catKey] || [];
-
-            list.forEach(biz => {
-                const card = document.createElement('div');
-                card.className = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:border-indigo-500/50 transition flex flex-col justify-between';
-                card.innerHTML = `
-                    <div>
-                        <div class="relative h-48 overflow-hidden bg-slate-100 dark:bg-slate-950">
-                            <img src="${biz.image}" class="w-full h-full object-cover" alt="${biz.name}" onerror="this.src='https://placehold.co/600x400/4f46e5/ffffff?text=EroDesk+Biz'">
-                            <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-mono">Salihli / Manisa</span>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="font-bold text-lg mb-2 text-slate-900 dark:text-slate-100">${biz.name}</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-4 flex items-center"><i class="fa-solid fa-location-dot text-indigo-500 mr-2"></i>${biz.address}</p>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-4 flex items-center"><i class="fa-solid fa-phone text-emerald-500 mr-2"></i>${biz.phone}</p>
-                        </div>
-                    </div>
-                    <div class="p-6 pt-0">
-                        <button onclick="selectBusinessAndChat('${biz.id}', '${biz.name}', '${catKey}')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center space-x-2">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
                             <i class="fa-solid fa-robot"></i>
-                            <span>Bu İşletmeyle AI Randevu Oluştur</span>
-                        </button>
+                        </div>
+                        <div>
+                            <div id="ai-chat-title" class="font-bold text-sm">AI Asistan</div>
+                            <div id="ai-chat-sub" class="text-[11px] text-slate-400">Doğrudan işletme gelen kutusuna entegre</div>
+                        </div>
                     </div>
-                `;
-                grid.appendChild(card);
+                    <input id="ai-customer-phone" placeholder="Telefonunuz (05XX...)" class="bg-slate-800 border border-slate-700 text-white text-xs px-3 py-1.5 rounded-xl w-44 outline-none focus:border-indigo-500">
+                </div>
+
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50 dark:bg-[#0b0f19]/60"></div>
+
+                <form onsubmit="handleChatSubmit(event)" class="p-4 bg-white dark:bg-[#131d31] border-t border-slate-200 dark:border-slate-800 flex items-center space-x-3">
+                    <input id="chat-input" type="text" placeholder="Örn: Saat 2 boş mu? veya merhaba..." class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm outline-none focus:border-indigo-500">
+                    <button type="submit" class="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg transition flex items-center space-x-2">
+                        <span>Gönder</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. PAKETLER & SATIN AL -->
+    <section id="tab-packages" class="tab-content space-y-8">
+        <div class="text-center max-w-2xl mx-auto space-y-3">
+            <span class="px-3.5 py-1 rounded-full bg-amber-500/15 text-amber-500 text-xs font-bold">EroDesk AI Lisans Paketleri</span>
+            <h2 class="text-3xl font-extrabold">İşletmenize Uygun Paketi Seçin</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                Tüm masaüstü yazılımlarımızla (DentDeskAI, HairDeskAI, BarberDeskAI, SkinDeskAI, VetDeskAI, TheraDeskAI, LawDeskAI) tam uyumlu 16 haneli lisans anahtarı anında tanımlanır.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- 1 Ay -->
+            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-6">
+                <div>
+                    <div class="text-xs font-bold text-indigo-500 uppercase">Başlangıç</div>
+                    <h3 class="text-xl font-extrabold mt-1">1 Aylık Lisans</h3>
+                    <div class="text-3xl font-extrabold text-emerald-500 mt-3">999 ₺ <span class="text-xs text-slate-400 font-normal">/ 1 Ay</span></div>
+                    <ul class="mt-5 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>7/24 Gemini AI WhatsApp Otomasyonu</span></li>
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>Canlı Randevu Çizelgesi &amp; Müşteri Arşivi</span></li>
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>EroDesk Canlı Destek &amp; Güncellemeler</span></li>
+                    </ul>
+                </div>
+                <button onclick="openPurchaseModal('1 Ay', '999 ₺')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">Satın Al</button>
+            </div>
+
+            <!-- 3 Ay -->
+            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-6">
+                <div>
+                    <div class="text-xs font-bold text-sky-500 uppercase">Popüler</div>
+                    <h3 class="text-xl font-extrabold mt-1">3 Aylık Lisans</h3>
+                    <div class="text-3xl font-extrabold text-emerald-500 mt-3">2.499 ₺ <span class="text-xs text-slate-400 font-normal">/ 3 Ay</span></div>
+                    <ul class="mt-5 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>Sınırsız Müşteri Kaydı &amp; Bakiye Takibi</span></li>
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>Otomatik Randevu Teyit &amp; Hatırlatma</span></li>
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>Çoklu Pencere &amp; Koyu/Renkli Tema Desteği</span></li>
+                    </ul>
+                </div>
+                <button onclick="openPurchaseModal('3 Ay', '2.499 ₺')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">Satın Al</button>
+            </div>
+
+            <!-- 6 Ay -->
+            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border-2 border-indigo-500 flex flex-col justify-between space-y-6 shadow-xl shadow-indigo-500/10">
+                <div>
+                    <div class="text-xs font-bold text-indigo-400 uppercase">Avantajlı</div>
+                    <h3 class="text-xl font-extrabold mt-1">6 Aylık Lisans</h3>
+                    <div class="text-3xl font-extrabold text-emerald-500 mt-3">4.999 ₺ <span class="text-xs text-slate-400 font-normal">/ 6 Ay</span></div>
+                    <ul class="mt-5 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>Web Sitesi + Masaüstü Canlı Entegrasyon</span></li>
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>Excel Yedekleme &amp; Gelir/Bakiye Raporları</span></li>
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>Öncelikli Teknik Kurulum &amp; Destek</span></li>
+                    </ul>
+                </div>
+                <button onclick="openPurchaseModal('6 Ay', '4.999 ₺')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">Satın Al</button>
+            </div>
+
+            <!-- 12 Ay -->
+            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-6">
+                <div>
+                    <div class="text-xs font-bold text-amber-500 uppercase">En Ekonomik</div>
+                    <h3 class="text-xl font-extrabold mt-1">12 Aylık Lisans</h3>
+                    <div class="text-3xl font-extrabold text-emerald-500 mt-3">9.999 ₺ <span class="text-xs text-slate-400 font-normal">/ 12 Ay</span></div>
+                    <ul class="mt-5 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>1 Yıl Boyunca Tüm Sürüm Güncellemeleri</span></li>
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>7/24 Akıllı AI Randevu &amp; Fiyat Asistanı</span></li>
+                        <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i><span>VIP Uzaktan Kurulum &amp; Özel Danışmanlık</span></li>
+                    </ul>
+                </div>
+                <button onclick="openPurchaseModal('12 Ay', '9.999 ₺')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">Satın Al</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. ADMİN PANELİ (SADECE ermananasizz@gmail.com) -->
+    <section id="tab-admin" class="tab-content space-y-8">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-shield-halved mr-2"></i>Admin Kategori &amp; İşletme Yönetimi</h2>
+                <p class="text-xs text-slate-400 mt-1">Burada eklediğiniz/düzenlediğiniz kategori ve işletmeler AdminDesk ve uygulamalarla senkronize edilir.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Kategori Yönetimi -->
+            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 space-y-4">
+                <h3 class="font-bold text-base">Kategoriler</h3>
+                <div class="flex gap-2">
+                    <input id="admin-new-cat-name" placeholder="Yeni kategori adı..." class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs">
+                    <button onclick="adminAddCategory()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold">Ekle</button>
+                </div>
+                <div id="admin-cat-list" class="space-y-2 max-h-72 overflow-y-auto"></div>
+            </div>
+
+            <!-- İşletme Yönetimi -->
+            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 space-y-4">
+                <h3 class="font-bold text-base">İşletmeler</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="admin-biz-cat" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs"></select>
+                    <input id="admin-biz-name" placeholder="İşletme Adı" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs">
+                    <input id="admin-biz-owner" placeholder="Yetkili Adı" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs">
+                    <input id="admin-biz-phone" placeholder="Telefon" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs">
+                </div>
+                <button onclick="adminAddBusiness()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold">Yeni İşletme Ekle</button>
+                <div id="admin-biz-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- GİRİŞ MODAL -->
+<div id="login-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
+        <button onclick="closeModal('login-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <h3 class="text-xl font-bold mb-6">Giriş Yap</h3>
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">E-posta Adresi</label>
+                <input type="email" id="login-email" required placeholder="ornek@mail.com" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Şifre</label>
+                <input type="password" id="login-password" required placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500">
+            </div>
+            <div class="flex items-center justify-between text-xs">
+                <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" id="login-remember" checked><span>Beni Hatırla</span></label>
+                <button type="button" onclick="closeModal('login-modal'); openModal('forgot-modal');" class="text-indigo-400 hover:underline font-semibold">Şifremi Unuttum</button>
+            </div>
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg transition">Giriş Yap</button>
+        </form>
+    </div>
+</div>
+
+<!-- KAYIT MODAL (6 HANELİ MAİL KODU + MİN 8 KARAKTER ŞİFRE) -->
+<div id="register-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
+        <button onclick="closeModal('register-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <h3 class="text-xl font-bold mb-5">Kayıt Ol</h3>
+
+        <form id="reg-step-1" onsubmit="handleRegisterSendCode(event)" class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Ad</label>
+                    <input type="text" id="reg-first" required placeholder="Adınız" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Soyad</label>
+                    <input type="text" id="reg-last" required placeholder="Soyadınız" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Telefon Numarası</label>
+                <input type="text" id="reg-phone" required placeholder="05XX XXX XX XX" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">E-posta Adresi</label>
+                <input type="email" id="reg-email" required placeholder="ornek@mail.com" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Şifre (En az 8 karakter)</label>
+                <input type="password" id="reg-password" required minlength="8" placeholder="En az 8 karakter" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none">
+            </div>
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg transition">Kayıt Ol</button>
+        </form>
+
+        <div id="reg-step-2" class="hidden space-y-4">
+            <div id="reg-code-info" class="p-3 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-xs text-indigo-300 text-center"></div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">6 Haneli Doğrulama Kodu</label>
+                <input type="text" id="reg-code-input" maxlength="6" placeholder="123456" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-center text-lg font-extrabold tracking-widest outline-none">
+            </div>
+            <button onclick="handleRegisterVerifyCode()" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition">Kodu Doğrula</button>
+            <button onclick="document.getElementById('reg-step-2').classList.add('hidden'); document.getElementById('reg-step-1').classList.remove('hidden');" class="w-full text-xs text-slate-400 hover:underline">Bilgileri Düzenle</button>
+        </div>
+    </div>
+</div>
+
+<!-- ŞİFREMİ UNUTTUM MODAL -->
+<div id="forgot-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
+        <button onclick="closeModal('forgot-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <h3 class="text-xl font-bold mb-5">Şifremi Unuttum</h3>
+        <div id="forgot-step-1" class="space-y-4">
+            <input type="email" id="forgot-email" placeholder="Kayıtlı e-posta adresiniz" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none">
+            <button onclick="handleForgotSendCode()" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">Doğrulama Kodu Gönder</button>
+        </div>
+        <div id="forgot-step-2" class="hidden space-y-3">
+            <div id="forgot-code-info" class="p-3 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-xs text-indigo-300 text-center"></div>
+            <input type="text" id="forgot-code" maxlength="6" placeholder="6 Haneli Kod" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-center font-bold tracking-widest outline-none">
+            <input type="password" id="forgot-new-pass" placeholder="Yeni Şifre (En az 8 karakter)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none">
+            <button onclick="handleForgotReset()" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition">Şifreyi Güncelle</button>
+        </div>
+    </div>
+</div>
+
+<!-- PROFİL MENÜSÜ MODAL (KOYU TEMA SWITCH + ADMİN + ÇIKIŞ) -->
+<div id="profile-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative space-y-5">
+        <button onclick="closeModal('profile-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="text-center">
+            <div id="profile-avatar-big" class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-white flex items-center justify-center text-2xl font-bold mx-auto mb-3">U</div>
+            <h3 id="profile-full-name" class="text-lg font-bold">Kullanıcı</h3>
+            <p id="profile-email-text" class="text-xs text-slate-400"></p>
+            <span id="profile-role-badge" class="inline-block mt-2 px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-400">Üye</span>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-moon text-indigo-400"></i>
+                <span class="text-xs font-semibold">Koyu Tema</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="profile-theme-switch" class="sr-only peer" checked onchange="toggleThemeSwitch(this.checked)">
+                <div class="w-11 h-6 bg-slate-400 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+            </label>
+        </div>
+
+        <button id="profile-admin-btn" onclick="closeModal('profile-modal'); switchTab('admin');" class="hidden w-full py-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-400 font-semibold text-xs hover:bg-amber-500/25 transition">
+            <i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Kategori &amp; İşletme Yönetimi
+        </button>
+
+        <button onclick="logoutUser()" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition">
+            <i class="fa-solid fa-right-from-bracket mr-1.5"></i>Çıkış Yap
+        </button>
+    </div>
+</div>
+
+<!-- SATIN AL IBAN MODAL -->
+<div id="purchase-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative space-y-5">
+        <button onclick="closeModal('purchase-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="text-center">
+            <h3 id="modal-package-title" class="text-xl font-bold">Lisans Paketi</h3>
+            <div id="modal-package-price" class="text-2xl font-extrabold text-emerald-400 mt-1">0 ₺</div>
+        </div>
+        <div class="space-y-2.5 text-xs bg-slate-100 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <div><span class="text-slate-400">Hesap Sahibi:</span> <b id="pay-holder">Erman Yıldız</b></div>
+            <div><span class="text-slate-400">Banka:</span> <b id="pay-bank">Ziraat Bankası</b></div>
+            <div><span class="text-slate-400">IBAN:</span> <b id="pay-iban" class="text-amber-400">TR33 0001 0000 0000 1234 5678 90</b></div>
+            <div><span class="text-slate-400">İletişim:</span> <b id="pay-contact">-</b></div>
+        </div>
+        <p class="text-[11.5px] text-slate-400 text-center">Ödeme sonrası 16 haneli lisans anahtarınız hesabınıza ve uygulamanıza tanımlanacaktır.</p>
+        <button onclick="closeModal('purchase-modal'); showToast('Lisans talebiniz alındı, ekibimiz iletişime geçecektir.', 'success');" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Tamam</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://127.0.0.1:5050';
+    const ADMIN_EMAIL = 'ermananasizz@gmail.com';
+    let isBackendOnline = false;
+    let currentUser = null;
+    let selectedCategory = null;
+    let selectedBusiness = null;
+    let chatStep = 0;
+    let apptData = { time: '', service: '', note: '', phone: '', name: '' };
+    let pendingRegEmail = '';
+    let pendingForgotEmail = '';
+    let localPendingCode = '';
+
+    let catalogData = {
+        categories: [
+            { id: 'klinikler', name: 'Diş Klinikleri (DentDeskAI)', icon: 'fa-tooth' },
+            { id: 'barberdesk', name: 'Erkek Kuaförleri (BarberDeskAI)', icon: 'fa-user-tie' },
+            { id: 'hairdesk', name: 'Kadın Kuaförleri (HairDeskAI)', icon: 'fa-scissors' },
+            { id: 'skindesk', name: 'Güzellik Salonları (SkinDeskAI)', icon: 'fa-wand-magic-sparkles' }
+        ],
+        businesses: [
+            { id: 'biz-1', category_id: 'klinikler', name: 'Manisa Özel Yıldız Diş Polikliniği', owner: 'Dt. Ali Yılmaz', phone: '0555 555 55 55', city: 'Manisa' },
+            { id: 'biz-barberdesk-1', category_id: 'barberdesk', name: 'BarberDeskAI Club', owner: 'Usta Berber', phone: '0555 000 00 00', city: 'İstanbul' },
+            { id: 'biz-hairdesk-1', category_id: 'hairdesk', name: 'HairDeskAI Stüdyo', owner: 'Kuaför Yetkilisi', phone: '0555 000 00 00', city: 'İstanbul' },
+            { id: 'biz-skindesk-1', category_id: 'skindesk', name: 'SkinDeskAI Estetik', owner: 'Uzman Estetisyen', phone: '0555 000 00 00', city: 'İstanbul' }
+        ],
+        sales_payment_info: { account_holder: 'Erman Yıldız', bank_name: 'Ziraat Bankası', iban_number: 'TR33 0001 0000 0000 1234 5678 90', contact_info: '-' }
+    };
+
+    window.onload = async function() {
+        const savedTheme = localStorage.getItem('erodesk_theme') || 'dark';
+        toggleThemeSwitch(savedTheme === 'dark', false);
+        const saved = localStorage.getItem('erodesk_current_user');
+        if (saved) {
+            try { currentUser = JSON.parse(saved); } catch(e) {}
+        }
+        updateAuthUI();
+        await syncCatalogFromAdminDesk();
+        setInterval(syncCatalogFromAdminDesk, 5000);
+    };
+
+    async function syncCatalogFromAdminDesk() {
+        try {
+            const res = await fetch(`${API_BASE}/api/public/catalog`);
+            if (!res.ok) throw new Error();
+            const d = await res.json();
+            if (d.categories && d.categories.length) catalogData.categories = d.categories;
+            if (d.businesses) catalogData.businesses = d.businesses;
+            if (d.sales_payment_info) catalogData.sales_payment_info = d.sales_payment_info;
+            isBackendOnline = true;
+            document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+            document.getElementById('sync-label').innerText = 'AdminDesk Bağlı';
+        } catch (e) {
+            isBackendOnline = false;
+            document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-amber-400';
+            document.getElementById('sync-label').innerText = 'Yerel Mod';
+        }
+        renderAiCategories();
+        if (currentUser && currentUser.email === ADMIN_EMAIL) renderAdminLists();
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabId)?.classList.add('active');
+        document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-500/10', 'shadow-sm'));
+        document.getElementById('tab-btn-' + tabId)?.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-500/10', 'shadow-sm');
+        if (tabId === 'ai') renderAiCategories();
+        if (tabId === 'admin') renderAdminLists();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startCategoryFlow(catId) {
+        switchTab('ai');
+        selectAiCategory(catId);
+    }
+
+    function renderAiCategories() {
+        const grid = document.getElementById('ai-category-grid');
+        if (!grid) return;
+        grid.innerHTML = catalogData.categories.map(c => `
+            <div onclick="selectAiCategory('${c.id}')" class="cursor-pointer p-5 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 hover:border-indigo-500 transition flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="fa-solid ${c.icon || 'fa-desktop'}"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-sm">${c.name}</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">${catalogData.businesses.filter(b => b.category_id === c.id).length} İşletme</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function selectAiCategory(catId) {
+        selectedCategory = catalogData.categories.find(c => c.id === catId) || { id: catId, name: catId };
+        document.getElementById('selected-cat-title').innerText = selectedCategory.name;
+        const list = catalogData.businesses.filter(b => b.category_id === catId);
+        const grid = document.getElementById('ai-business-grid');
+        grid.innerHTML = list.length ? list.map(b => `
+            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-4">
+                <div>
+                    <h4 class="font-bold text-base">${b.name}</h4>
+                    <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-user-doctor mr-1.5 text-indigo-400"></i>${b.owner || '-'}</p>
+                    <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-phone mr-1.5 text-emerald-400"></i>${b.phone || '-'}</p>
+                    <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-location-dot mr-1.5 text-rose-400"></i>${b.city || '-'}</p>
+                </div>
+                <button onclick="selectAiBusiness('${b.id}')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
+                    <i class="fa-solid fa-robot mr-1.5"></i>AI Asistana Bağlan
+                </button>
+            </div>
+        `).join('') : '<div class="col-span-3 text-center text-sm text-slate-400 py-8">Bu kategoride henüz işletme bulunmuyor.</div>';
+        backToStep(2);
+    }
+
+    function selectAiBusiness(bizId) {
+        selectedBusiness = catalogData.businesses.find(b => b.id === bizId);
+        if (!selectedBusiness) return;
+        document.getElementById('ai-chat-title').innerText = `${selectedBusiness.name} • AI Asistan`;
+        document.getElementById('ai-chat-sub').innerText = `${selectedCategory?.name || ''} — Doğrudan gelen kutusuna entegre`;
+        if (currentUser && currentUser.phone) document.getElementById('ai-customer-phone').value = currentUser.phone;
+        chatStep = 0;
+        apptData = { time: '', service: '', note: '', phone: '', name: '' };
+        document.getElementById('chat-messages').innerHTML = '';
+        appendAiMsg(`Merhaba! ${selectedBusiness.name} yapay zeka asistanıyım. "Saat 2 boş mu?" veya istediğiniz işlem/saat hakkında soru sorabilirsiniz.`);
+        backToStep(3);
+    }
+
+    function backToStep(step) {
+        [1, 2, 3].forEach(s => {
+            document.getElementById('ai-step-' + s).classList.toggle('hidden', s !== step);
+            const pill = document.getElementById('step-pill-' + s);
+            if (s === step) pill.className = 'px-3 py-1.5 rounded-full bg-indigo-600 text-white';
+            else pill.className = 'px-3 py-1.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500';
+        });
+    }
+
+    async function handleChatSubmit(e) {
+        e.preventDefault();
+        const inp = document.getElementById('chat-input');
+        const txt = inp.value.trim();
+        if (!txt) return;
+        appendUserMsg(txt);
+        inp.value = '';
+        const phone = document.getElementById('ai-customer-phone').value.trim() || currentUser?.phone || '0532 111 22 33';
+
+        if (isBackendOnline) {
+            try {
+                const res = await fetch(`${API_BASE}/api/public/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category_id: selectedCategory?.id || 'klinikler',
+                        business_id: selectedBusiness?.id || '',
+                        business_name: selectedBusiness?.name || '',
+                        customer_phone: phone,
+                        message: txt
+                    })
+                });
+                const d = await res.json();
+                if (d.connected_app && d.reply) {
+                    appendAiMsg(d.reply);
+                    return;
+                }
+            } catch (err) {}
+        }
+        processOfflineSectorAi(txt);
+    }
+
+    function processOfflineSectorAi(txt) {
+        const catId = selectedCategory?.id || 'klinikler';
+        const lower = txt.toLowerCase();
+        if (catId === 'klinikler') {
+            if (chatStep === 0) {
+                apptData.time = lower.includes('2') || lower.includes('14') ? '14:00' : txt;
+                chatStep = 1;
+                appendAiMsg(`Evet, saat ${apptData.time} boş! Dilerseniz randevunuzu oluşturabilirim, oluşturmamı ister misiniz?`);
+            } else if (chatStep === 1) {
+                chatStep = 2;
+                appendAiMsg('Randevunuzu oluşturabilmem için Ad Soyad ve telefon numaranızı paylaşabilir misiniz? Ayrıca şikayetiniz nedir, randevunuza not olarak ne yazmamı istersiniz?');
+            } else {
+                chatStep = 0;
+                appendAiMsg(`✅ ${selectedBusiness?.name} için saat ${apptData.time} randevunuz "${txt}" notuyla kaydedildi!`);
+            }
+        } else {
+            if (chatStep === 0) {
+                apptData.time = lower.includes('2') || lower.includes('14') ? '14:00' : txt;
+                chatStep = 1;
+                appendAiMsg(`Evet, bu saatimiz uygun! Hangi işlem için randevu almak istiyorsunuz, randevunuza not olarak ne yazmamı istersiniz? (İsterseniz boş bırakabilirsiniz.)`);
+            } else {
+                chatStep = 0;
+                appendAiMsg(`✅ ${selectedBusiness?.name} için randevunuz "${txt}" detayıyla oluşturuldu!`);
+            }
+        }
+    }
+
+    function resetChat() {
+        chatStep = 0;
+        if (selectedBusiness) selectAiBusiness(selectedBusiness.id);
+    }
+
+    function appendUserMsg(t) {
+        const c = document.getElementById('chat-messages');
+        c.innerHTML += `<div class="flex justify-end"><div class="bg-indigo-600 text-white rounded-2xl px-4 py-3 max-w-md text-sm">${escapeHtml(t)}</div></div>`;
+        c.scrollTop = c.scrollHeight;
+    }
+    function appendAiMsg(t) {
+        const c = document.getElementById('chat-messages');
+        c.innerHTML += `<div class="flex justify-start"><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(t)}</div></div>`;
+        c.scrollTop = c.scrollHeight;
+    }
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    // AUTH + 6 HANELİ KOD + ŞİFREMİ UNUTTUM
+    async function handleRegisterSendCode(e) {
+        e.preventDefault();
+        const first_name = document.getElementById('reg-first').value.trim();
+        const last_name = document.getElementById('reg-last').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const email = document.getElementById('reg-email').value.trim().toLowerCase();
+        const password = document.getElementById('reg-password').value;
+        if (!/^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,}$/.test(first_name) || !/^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,}$/.test(last_name)) {
+            showToast('Geçerli Ad ve Soyad girin (en az 2 harf).', 'error'); return;
+        }
+        if (password.length < 8) { showToast('Şifre en az 8 karakter olmalıdır.', 'error'); return; }
+        pendingRegEmail = email;
+
+        if (isBackendOnline) {
+            const res = await fetch(`${API_BASE}/api/public/auth/send_code`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ first_name, last_name, phone, email, password })
             });
+            const d = await res.json();
+            if (!res.ok) { showToast(d.error || 'Kayıt hatası', 'error'); return; }
+            document.getElementById('reg-code-info').innerHTML = d.email_sent
+                ? `<b>${email}</b> adresine <b>destek.erodesk@gmail.com</b> üzerinden 6 haneli doğrulama kodu gönderildi.`
+                : `Doğrulama kodunuz: <b class="text-amber-400 text-base">${d.dev_code}</b>`;
+        } else {
+            localPendingCode = String(Math.floor(100000 + Math.random() * 900000));
+            document.getElementById('reg-code-info').innerHTML = `AdminDesk bağlı olmadığı için yerel test kodu: <b class="text-amber-400 text-base">${localPendingCode}</b>`;
         }
+        document.getElementById('reg-step-1').classList.add('hidden');
+        document.getElementById('reg-step-2').classList.remove('hidden');
+    }
 
-        // Select Business and Jump to AI Chat
-        function selectBusinessAndChat(bizId, bizName, catKey) {
-            selectedBusiness = { id: bizId, name: bizName, category: catKey };
-            document.getElementById('ai-banner-biz-name').innerText = bizName;
-            
-            const titles = {
-                klinik: 'DentDeskAI Randevu Asistanı',
-                erkek: 'BarberDeskAI Randevu Asistanı',
-                kadin: 'HairDeskAI Randevu Asistanı',
-                guzellik: 'SkinDeskAI Randevu Asistanı'
+    async function handleRegisterVerifyCode() {
+        const code = document.getElementById('reg-code-input').value.trim();
+        if (isBackendOnline) {
+            const res = await fetch(`${API_BASE}/api/public/auth/verify_register`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: pendingRegEmail, code })
+            });
+            const d = await res.json();
+            if (!res.ok) { showToast(d.error || 'Kod hatalı', 'error'); return; }
+            currentUser = d.user;
+        } else {
+            if (code !== localPendingCode) { showToast('Doğrulama kodu hatalı.', 'error'); return; }
+            currentUser = {
+                first_name: document.getElementById('reg-first').value.trim(),
+                last_name: document.getElementById('reg-last').value.trim(),
+                phone: document.getElementById('reg-phone').value.trim(),
+                email: pendingRegEmail,
+                role: pendingRegEmail === ADMIN_EMAIL ? 'admin' : 'user'
             };
-            document.getElementById('ai-chat-title').innerText = titles[catKey] || 'AI Randevu Asistanı';
-
-            const initialMsgs = {
-                klinik: `Merhaba! ${bizName} için DentDeskAI klinik asistanıyım. "Saat 2 boş mu?" diyerek randevu sürecini başlatabilirsiniz.`,
-                erkek: `Merhaba! ${bizName} için BarberDeskAI asistanıyım. Hangi işlem için randevu almak istiyorsunuz, not olarak ne yazmamı istersiniz?`,
-                kadin: `Merhaba! ${bizName} için HairDeskAI asistanıyım. Hangi işlem için randevu almak istiyorsunuz, not olarak ne yazmamı istersiniz?`,
-                guzellik: `Merhaba! ${bizName} için SkinDeskAI asistanıyım. Hangi işlem için randevu almak istiyorsunuz, not olarak ne yazmamı istersiniz?`
-            };
-            document.getElementById('ai-initial-msg').innerText = initialMsgs[catKey] || 'Merhaba! Randevu işlemlerinizde size nasıl yardımcı olabilirim?';
-
-            switchTab('ai-appointment');
-            showToast(`${bizName} seçildi.`, 'success');
         }
+        localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
+        updateAuthUI();
+        closeModal('register-modal');
+        showToast('Kayıt tamamlandı ve giriş yapıldı!', 'success');
+    }
 
-        // AI Chatbot State Engine
-        let chatStep = 0;
-        let appointmentData = { time: '', service: '', note: '', phone: '' };
-
-        function handleChatSubmit(e) {
-            e.preventDefault();
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (!text) return;
-
-            appendUserMessage(text);
-            input.value = '';
-
-            setTimeout(() => {
-                processAiResponse(text);
-            }, 600);
-        }
-
-        function appendUserMessage(text) {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            div.className = 'flex items-start justify-end space-x-3';
-            div.innerHTML = `
-                <div class="bg-indigo-600 text-white rounded-2xl p-4 max-w-lg shadow-sm text-sm">${escapeHtml(text)}</div>
-                <div class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">Sen</div>
-            `;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function appendAiMessage(text) {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            div.className = 'flex items-start space-x-3';
-            div.innerHTML = `
-                <div class="w-8 h-8 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-shrink-0 text-xs border border-cyan-500/20">AI</div>
-                <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 max-w-lg text-slate-800 dark:text-slate-300 shadow-sm text-sm">${escapeHtml(text)}</div>
-            `;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function processAiResponse(text) {
-            const cat = selectedBusiness ? selectedBusiness.category : 'klinik';
-            const lower = text.toLowerCase();
-
-            if (cat === 'klinik') {
-                // DentDeskAI Flow
-                if (chatStep === 0) {
-                    if (lower.includes('saat 2') || lower.includes('saat 14') || lower.includes('2') || lower.includes('boş mu')) {
-                        appointmentData.time = 'Saat 14:00';
-                        chatStep = 1;
-                        appendAiMessage("Saat 14:00 uygun, dilerseniz randevunuzu oluşturabilirim. Şikayetiniz nedir, randevunuza not olarak ne yazmamı istersiniz?");
-                    } else {
-                        appointmentData.time = text;
-                        chatStep = 1;
-                        appendAiMessage(`Belirttiğiniz (${text}) saat için müsaitlik kontrolü yapıldı. Şikayetiniz nedir, randevunuza not olarak ne yazmamı istersiniz?`);
-                    }
-                } else if (chatStep === 1) {
-                    appointmentData.note = text;
-                    chatStep = 2;
-                    appendAiMessage("Harika! Randevunuzu onaylamak için lütfen telefon numaranızı yazar mısınız?");
-                } else if (chatStep === 2) {
-                    appointmentData.phone = text;
-                    appendAiMessage(`Tebrikler! ${selectedBusiness ? selectedBusiness.name : 'Seçilen klinik'} için randevunuz başarıyla oluşturuldu.\nRandevu Saati: ${appointmentData.time}\nNot: ${appointmentData.note}\nTelefon: ${appointmentData.phone}`);
-                    showToast('Randevu başarıyla oluşturuldu!', 'success');
-                    chatStep = 0;
-                }
+    async function handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim().toLowerCase();
+        const password = document.getElementById('login-password').value;
+        if (isBackendOnline) {
+            const res = await fetch(`${API_BASE}/api/public/auth/login`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const d = await res.json();
+            if (!res.ok) { showToast(d.error || 'E-posta veya şifre hatalı', 'error'); return; }
+            currentUser = d.user;
+        } else {
+            if (email === ADMIN_EMAIL && password === 'Ermann2424') {
+                currentUser = { first_name: 'Erman', last_name: 'Anasız', email, role: 'admin', phone: '0555 555 55 55' };
             } else {
-                // BarberDeskAI, HairDeskAI, SkinDeskAI Flow
-                if (chatStep === 0) {
-                    appointmentData.service = text;
-                    chatStep = 1;
-                    appendAiMessage("Hangi gün ve saatte randevu almak istersiniz?");
-                } else if (chatStep === 1) {
-                    appointmentData.time = text;
-                    chatStep = 2;
-                    appendAiMessage("Randevunuza not olarak eklemek istediğiniz bir detay var mı? (İsterseniz geçebilirsiniz)");
-                } else if (chatStep === 2) {
-                    appointmentData.note = text;
-                    chatStep = 3;
-                    appendAiMessage("Onaylamak için lütfen telefon numaranızı yazar mısınız?");
-                } else if (chatStep === 3) {
-                    appointmentData.phone = text;
-                    appendAiMessage(`İşleminiz tamamlandı! ${selectedBusiness ? selectedBusiness.name : 'İşletme'} için randevunuz kaydedildi.\nİşlem: ${appointmentData.service}\nZaman: ${appointmentData.time}\nNot: ${appointmentData.note || 'Belirtilmedi'}\nTel: ${appointmentData.phone}`);
-                    showToast('Randevu başarıyla oluşturuldu!', 'success');
-                    chatStep = 0;
-                }
+                showToast('Giriş için AdminDesk bağlantısı gereklidir.', 'error'); return;
             }
         }
+        localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
+        updateAuthUI();
+        closeModal('login-modal');
+        showToast('Başarıyla giriş yapıldı.', 'success');
+    }
 
-        function resetChat() {
-            chatStep = 0;
-            appointmentData = { time: '', service: '', note: '', phone: '' };
-            const container = document.getElementById('chat-messages');
-            container.innerHTML = `
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-shrink-0 text-xs border border-cyan-500/20">AI</div>
-                    <div id="ai-initial-msg" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 max-w-lg text-slate-800 dark:text-slate-300 shadow-sm text-sm">
-                        Sohbet sıfırlandı. Nasıl yardımcı olabilirim?
-                    </div>
+    async function handleForgotSendCode() {
+        const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+        if (!email) return;
+        pendingForgotEmail = email;
+        if (isBackendOnline) {
+            const res = await fetch(`${API_BASE}/api/public/auth/forgot_send_code`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const d = await res.json();
+            if (!res.ok) { showToast(d.error || 'Hata', 'error'); return; }
+            document.getElementById('forgot-code-info').innerHTML = d.email_sent
+                ? `<b>${email}</b> adresine 6 haneli sıfırlama kodu gönderildi.`
+                : `Sıfırlama kodunuz: <b class="text-amber-400">${d.dev_code}</b>`;
+        } else {
+            localPendingCode = String(Math.floor(100000 + Math.random() * 900000));
+            document.getElementById('forgot-code-info').innerHTML = `Test sıfırlama kodunuz: <b class="text-amber-400">${localPendingCode}</b>`;
+        }
+        document.getElementById('forgot-step-1').classList.add('hidden');
+        document.getElementById('forgot-step-2').classList.remove('hidden');
+    }
+
+    async function handleForgotReset() {
+        const code = document.getElementById('forgot-code').value.trim();
+        const new_password = document.getElementById('forgot-new-pass').value;
+        if (new_password.length < 8) { showToast('Yeni şifre en az 8 karakter olmalıdır.', 'error'); return; }
+        if (isBackendOnline) {
+            const res = await fetch(`${API_BASE}/api/public/auth/forgot_reset`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: pendingForgotEmail, code, new_password })
+            });
+            const d = await res.json();
+            if (!res.ok) { showToast(d.error || 'Kod hatalı', 'error'); return; }
+        }
+        closeModal('forgot-modal');
+        openModal('login-modal');
+        showToast('Şifreniz güncellendi! Giriş yapabilirsiniz.', 'success');
+    }
+
+    function logoutUser() {
+        currentUser = null;
+        localStorage.removeItem('erodesk_current_user');
+        updateAuthUI();
+        closeModal('profile-modal');
+        switchTab('home');
+        showToast('Çıkış yapıldı.', 'info');
+    }
+
+    function updateAuthUI() {
+        const actions = document.getElementById('auth-actions');
+        const pill = document.getElementById('user-pill');
+        const adminTab = document.getElementById('tab-btn-admin');
+        const profileAdminBtn = document.getElementById('profile-admin-btn');
+        if (!currentUser) {
+            actions.classList.remove('hidden');
+            pill.classList.add('hidden'); pill.classList.remove('flex');
+            adminTab.classList.add('hidden');
+            profileAdminBtn.classList.add('hidden');
+            return;
+        }
+        const fullName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.email;
+        const isAdmin = currentUser.email === ADMIN_EMAIL;
+        actions.classList.add('hidden');
+        pill.classList.remove('hidden'); pill.classList.add('flex');
+        document.getElementById('nav-user-name').innerText = fullName;
+        document.getElementById('nav-user-avatar').innerText = fullName[0].toUpperCase();
+        document.getElementById('profile-avatar-big').innerText = fullName[0].toUpperCase();
+        document.getElementById('profile-full-name').innerText = fullName;
+        document.getElementById('profile-email-text').innerText = currentUser.email;
+        document.getElementById('profile-role-badge').innerText = isAdmin ? 'Sistem Yöneticisi (Admin)' : 'Kayıtlı Üye';
+        adminTab.classList.toggle('hidden', !isAdmin);
+        profileAdminBtn.classList.toggle('hidden', !isAdmin);
+    }
+
+    function toggleThemeSwitch(isDark, notify = true) {
+        document.documentElement.classList.toggle('dark', isDark);
+        const sw = document.getElementById('profile-theme-switch');
+        if (sw) sw.checked = isDark;
+        localStorage.setItem('erodesk_theme', isDark ? 'dark' : 'light');
+        if (notify) showToast(isDark ? 'Koyu tema aktif.' : 'Açık tema aktif.', 'info');
+    }
+
+    // ADMİN İŞLEMLERİ
+    function renderAdminLists() {
+        const catList = document.getElementById('admin-cat-list');
+        const bizSel = document.getElementById('admin-biz-cat');
+        const bizList = document.getElementById('admin-biz-list');
+        if (!catList || !bizSel || !bizList) return;
+        catList.innerHTML = catalogData.categories.map(c => `
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-xs">
+                <span><i class="fa-solid ${c.icon || 'fa-folder'} mr-2 text-indigo-400"></i><b>${c.name}</b></span>
+                <div class="flex gap-2">
+                    <button onclick="adminEditCategory('${c.id}', '${c.name.replace(/'/g, "\\'")}')" class="text-sky-400 hover:underline">Düzenle</button>
+                    <button onclick="adminDeleteCategory('${c.id}')" class="text-rose-400 hover:underline">Sil</button>
                 </div>
-            `;
-            showToast('Sohbet temizlendi.', 'info');
-        }
-
-        function openPurchaseModal(packageName, price) {
-            openModal('purchase-modal');
-            document.getElementById('modal-package-title').innerText = packageName + ' Lisans Paketi';
-            document.getElementById('modal-package-price').innerText = price;
-        }
-
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-        }
-
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            if(!container) return;
-            const toast = document.createElement('div');
-            const bgCol = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-rose-600' : 'bg-indigo-600');
-            toast.className = `${bgCol} text-white px-5 py-3 rounded-2xl shadow-2xl text-xs font-semibold flex items-center space-x-2 animate-bounce transition-all`;
-            toast.innerHTML = `<i class="fa-solid fa-circle-info mr-1"></i><span>${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.remove();
-            }, 3500);
-        }
-
-        function updateAuthUI() {
-            const authActions = document.getElementById('auth-actions');
-            const pill = document.getElementById('user-pill');
-            if (!currentUser) {
-                authActions.classList.remove('hidden');
-                pill.classList.add('hidden');
-                pill.classList.remove('flex');
-                return;
-            }
-            authActions.classList.add('hidden');
-            pill.classList.remove('hidden');
-            pill.classList.add('flex');
-            document.getElementById('nav-user-name').innerText = currentUser.name;
-        }
-
-        // Login & Register Mock handlers
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-password').value;
-            
-            // Check if admin
-            if (email === 'ermananasizz@gmail.com') {
-                currentUser = { name: 'Erman Anasız', email: email, role: 'admin' };
-            } else {
-                currentUser = { name: email.split('@')[0], email: email, role: 'user' };
-            }
-            localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
-            updateAuthUI();
-            closeModal('login-modal');
-            showToast('Başarıyla giriş yapıldı.', 'success');
-        }
-
-        function handleRegister(e) {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            
-            currentUser = { name: name, email: email, role: email === 'ermananasizz@gmail.com' ? 'admin' : 'user' };
-            localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
-            updateAuthUI();
-            closeModal('register-modal');
-            showToast('Kayıt oluşturuldu ve giriş yapıldı.', 'success');
-        }
-
-        function logoutUser() {
-            currentUser = null;
-            localStorage.removeItem('erodesk_current_user');
-            updateAuthUI();
-            closeModal('profile-modal');
-            showToast('Çıkış yapıldı.', 'info');
-        }
-    </script>
-
-    <!-- Modals for Auth and Purchase -->
-    <div id="login-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
-            <button onclick="closeModal('login-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-slate-100">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <h3 class="text-xl font-bold mb-6 text-slate-900 dark:text-slate-100">Giriş Yap</h3>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">E-posta Adresi</label>
-                    <input type="email" id="login-email" required placeholder="ornek@mail.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-slate-100">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">Şifre</label>
-                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-slate-100">
-                </div>
-                <button type="submit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition mt-2">
-                    Giriş Yap
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <div id="register-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
-            <button onclick="closeModal('register-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-slate-100">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <h3 class="text-xl font-bold mb-6 text-slate-900 dark:text-slate-100">Kayıt Ol</h3>
-            <form onsubmit="handleRegister(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">Ad Soyad</label>
-                    <input type="text" id="reg-name" required placeholder="Adınız Soyadınız" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-slate-100">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">E-posta Adresi</label>
-                    <input type="email" id="reg-email" required placeholder="ornek@mail.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-slate-100">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">Şifre Belirle</label>
-                    <input type="password" id="reg-password" required placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-slate-100">
-                </div>
-                <button type="submit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition mt-2">
-                    Hesap Oluştur
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <div id="profile-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative text-center">
-            <button onclick="closeModal('profile-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-slate-100">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <div class="w-16 h-16 rounded-full bg-indigo-600 text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                <i class="fa-solid fa-user"></i>
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">Hesap Bilgileri</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Oturum açık</p>
-            <button onclick="logoutUser()" class="w-full py-3.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow-lg transition">
-                Çıkış Yap
-            </button>
-        </div>
-    </div>
+        `).join('');
+        bizSel.innerHTML = catalogData.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        bizList.innerHTML = catalogData.businesses.map(b => `
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-xs">
+                <div><b>${b.name}</b> <span class="text-slate-400">(${b.owner || '-'})</span></div>
+                <button onclick="adminDeleteBusiness('${b.id}')" class="text-rose-400 hover:underline">Sil</button>
+            </div>
+        `).join('');
+    }
 
-    <div id="purchase-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
-            <button onclick="closeModal('purchase-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-slate-100">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl mx-auto mb-3">
-                    <i class="fa-solid fa-tag"></i>
-                </div>
-                <h3 id="modal-package-title" class="text-xl font-bold text-slate-900 dark:text-slate-100">Yazılım Paketi</h3>
-                <div id="modal-package-price" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2">₺0 / ay</div>
-            </div>
-            <div class="space-y-4 text-xs text-slate-600 dark:text-slate-400 mb-6">
-                <p>Lisansınız anında dijital olarak tanımlanacak ve aktif edilecektir. Kurulum ve destek ekibimiz sizinle iletişime geçecektir.</p>
-            </div>
-            <button onclick="closeModal('purchase-modal'); showToast('Lisans talebiniz alındı! İletişime geçilecektir.', 'success');" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition">
-                Satın Almayı Tamamla
-            </button>
-        </div>
-    </div>
+    async function adminAddCategory() {
+        const name = document.getElementById('admin-new-cat-name').value.trim();
+        if (!name) return;
+        if (isBackendOnline) {
+            await fetch(`${API_BASE}/api/categories/add`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ name, icon: 'fa-building' }) });
+            await syncCatalogFromAdminDesk();
+        }
+        document.getElementById('admin-new-cat-name').value = '';
+        showToast('Kategori eklendi.', 'success');
+    }
+
+    async function adminEditCategory(id, oldName) {
+        const name = prompt('Yeni kategori adı:', oldName);
+        if (!name || !name.trim()) return;
+        if (isBackendOnline) {
+            await fetch(`${API_BASE}/api/categories/update`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id, name: name.trim() }) });
+            await syncCatalogFromAdminDesk();
+        }
+    }
+
+    async function adminDeleteCategory(id) {
+        if (!confirm('Kategoriyi silmek istediğinize emin misiniz?')) return;
+        if (isBackendOnline) {
+            await fetch(`${API_BASE}/api/categories/delete`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id }) });
+            await syncCatalogFromAdminDesk();
+        }
+    }
+
+    async function adminAddBusiness() {
+        const category_id = document.getElementById('admin-biz-cat').value;
+        const name = document.getElementById('admin-biz-name').value.trim();
+        const owner = document.getElementById('admin-biz-owner').value.trim();
+        const phone = document.getElementById('admin-biz-phone').value.trim();
+        if (!name) return;
+        if (isBackendOnline) {
+            await fetch(`${API_BASE}/api/businesses/add`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ category_id, name, owner, phone }) });
+            await syncCatalogFromAdminDesk();
+        }
+        document.getElementById('admin-biz-name').value = '';
+        showToast('İşletme eklendi ve senkronize edildi!', 'success');
+    }
+
+    async function adminDeleteBusiness(id) {
+        if (!confirm('İşletmeyi silmek istediğinize emin misiniz?')) return;
+        if (isBackendOnline) {
+            await fetch(`${API_BASE}/api/businesses/delete`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id }) });
+            await syncCatalogFromAdminDesk();
+        }
+    }
+
+    function openPurchaseModal(period, price) {
+        document.getElementById('modal-package-title').innerText = period + ' Lisans Paketi';
+        document.getElementById('modal-package-price').innerText = price;
+        const sp = catalogData.sales_payment_info || {};
+        document.getElementById('pay-holder').innerText = sp.account_holder || 'Erman Yıldız';
+        document.getElementById('pay-bank').innerText = sp.bank_name || 'Ziraat Bankası';
+        document.getElementById('pay-iban').innerText = sp.iban_number || 'TR33 0001 0000 0000 1234 5678 90';
+        document.getElementById('pay-contact').innerText = sp.contact_info || '-';
+        openModal('purchase-modal');
+    }
+
+    function openModal(id) { const m = document.getElementById(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } }
+    function closeModal(id) { const m = document.getElementById(id); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } }
+    function showToast(msg, type = 'success') {
+        const c = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        const col = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-rose-600' : 'bg-indigo-600');
+        t.className = `${col} text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold`;
+        t.innerText = msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+    }
+</script>
 </body>
 </html>
