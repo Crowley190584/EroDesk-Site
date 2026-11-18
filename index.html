@@ -790,9 +790,25 @@
         }
     }
 
-    function resetChat() {
+    async function resetChat() {
         chatStep = 0;
-        if (selectedBusiness) selectAiBusiness(selectedBusiness.id);
+        if (isBackendOnline && selectedBusiness?.id && currentUser?.phone) {
+            try {
+                await fetch(`${API_BASE}/api/public/conversation/clear`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        business_id: selectedBusiness.id,
+                        phone: currentUser.phone.trim()
+                    })
+                });
+            } catch (e) {}
+        }
+        document.getElementById('chat-messages').innerHTML = '';
+        if (selectedBusiness) {
+            await selectAiBusiness(selectedBusiness.id);
+        }
+        showToast('Sohbet temizlendi.', 'info');
     }
 
     function appendUserMsg(t) {
