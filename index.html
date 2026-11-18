@@ -54,9 +54,6 @@
             <button id="tab-btn-packages" onclick="switchTab('packages')" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
                 <i class="fa-solid fa-crown mr-1.5"></i>Paketler &amp; Satın Al
             </button>
-            <button id="tab-btn-admin" onclick="switchTab('admin')" class="hidden nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-amber-500 hover:bg-amber-500/10 transition">
-                <i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Paneli
-            </button>
         </nav>
 
         <div class="flex items-center space-x-3">
@@ -87,13 +84,13 @@
             <div class="max-w-3xl space-y-6">
                 <span class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold">
                     <i class="fa-solid fa-sparkles"></i>
-                    <span>AdminDesk &amp; 7 Sektörel AI Uygulama ile Tam Entegre</span>
+                    <span>Yapay Zeka Destekli Akıllı Randevu Sistemi</span>
                 </span>
                 <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
                     İşletmenizi <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">Yapay Zeka</span> ile 7/24 Yönetin
                 </h1>
                 <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-                    DentDeskAI, HairDeskAI, BarberDeskAI, SkinDeskAI, VetDeskAI, TheraDeskAI ve LawDeskAI masaüstü uygulamalarıyla doğrudan senkronize çalışan akıllı randevu ve müşteri yönetimi platformu.
+                    DentDeskAI, HairDeskAI, BarberDeskAI ve SkinDeskAI uygulamalarıyla doğrudan senkronize çalışan akıllı randevu ve müşteri yönetimi platformu.
                 </p>
                 <div class="flex flex-wrap gap-3 pt-2">
                     <button onclick="switchTab('ai')" class="px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-xl shadow-indigo-600/30 transition flex items-center space-x-2">
@@ -140,12 +137,12 @@
         </div>
     </section>
 
-    <!-- 2. AI RANDEVU (ADIM 1: KATEGORİ -> ADIM 2: İŞLETME -> ADIM 3: AI BOT) -->
+    <!-- 2. AI RANDEVU (LOKASYON -> ADIM 1: KATEGORİ -> ADIM 2: İŞLETME -> ADIM 3: AI BOT) -->
     <section id="tab-ai" class="tab-content space-y-8">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h2 class="text-2xl font-bold">AI Randevu Asistanı</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">1. Kategori Seçin &rarr; 2. İşletme Seçin &rarr; 3. Yapay Zeka ile Randevunuzu Oluşturun</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">İl / İlçe Seçin &rarr; 1. Kategori Seçin &rarr; 2. İşletme Seçin &rarr; 3. Yapay Zeka ile Randevu Alın</p>
             </div>
             <div class="flex items-center space-x-2 text-xs font-semibold">
                 <span id="step-pill-1" class="px-3 py-1.5 rounded-full bg-indigo-600 text-white">1. Kategori</span>
@@ -156,19 +153,49 @@
             </div>
         </div>
 
+        <!-- LOKASYON SEÇİMİ (MANİSA / SALİHLİ) -->
+        <div class="p-5 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-4">
+            <div class="flex items-center space-x-2 text-xs font-bold text-indigo-400">
+                <i class="fa-solid fa-location-dot text-base"></i>
+                <span>Lokasyon Seçin:</span>
+            </div>
+            <select id="select-city" onchange="handleCityChange()" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-indigo-500">
+                <option value="">İl Seçin...</option>
+                <option value="manisa">Manisa</option>
+            </select>
+            <select id="select-district" onchange="handleDistrictChange()" disabled class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-indigo-500 disabled:opacity-50">
+                <option value="">Önce İl Seçin...</option>
+            </select>
+        </div>
+
+        <div id="location-placeholder" class="p-10 rounded-3xl bg-white dark:bg-[#131d31] border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-2">
+            <i class="fa-solid fa-map-location-dot text-3xl text-indigo-400"></i>
+            <p class="text-sm font-semibold">Kategorileri ve işletmeleri görmek için lütfen <b>Manisa / Salihli</b> lokasyonunu seçin.</p>
+        </div>
+
         <!-- ADIM 1: KATEGORİ SEÇİMİ -->
-        <div id="ai-step-1" class="space-y-4">
-            <h3 class="text-sm font-bold text-slate-600 dark:text-slate-300">Adım 1: Hizmet Kategorisi Seçin</h3>
+        <div id="ai-step-1" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-slate-600 dark:text-slate-300">Adım 1: Hizmet Kategorisi Seçin</h3>
+                <button id="btn-inline-add-cat" onclick="openCatModal()" class="hidden px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">
+                    <i class="fa-solid fa-plus mr-1"></i>Kategori Ekle
+                </button>
+            </div>
             <div id="ai-category-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
         </div>
 
         <!-- ADIM 2: İŞLETME SEÇİMİ -->
         <div id="ai-step-2" class="hidden space-y-4">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-center justify-between gap-3">
                 <h3 class="text-sm font-bold text-slate-600 dark:text-slate-300">
-                    Adım 2: <span id="selected-cat-title" class="text-indigo-500">Kategori</span> İşletmeleri
+                    Adım 2: <span id="selected-cat-title" class="text-indigo-500">Kategori</span> İşletmeleri (Manisa / Salihli)
                 </h3>
-                <button onclick="backToStep(1)" class="text-xs font-semibold text-indigo-500 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i>Kategorilere Dön</button>
+                <div class="flex items-center gap-3">
+                    <button id="btn-inline-add-biz" onclick="openBizModal()" class="hidden px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold">
+                        <i class="fa-solid fa-plus mr-1"></i>İşletme Ekle
+                    </button>
+                    <button onclick="backToStep(1)" class="text-xs font-semibold text-indigo-500 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i>Kategorilere Dön</button>
+                </div>
             </div>
             <div id="ai-business-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
@@ -213,7 +240,7 @@
             <span class="px-3.5 py-1 rounded-full bg-amber-500/15 text-amber-500 text-xs font-bold">EroDesk AI Lisans Paketleri</span>
             <h2 class="text-3xl font-extrabold">İşletmenize Uygun Paketi Seçin</h2>
             <p class="text-sm text-slate-500 dark:text-slate-400">
-                Tüm masaüstü yazılımlarımızla (DentDeskAI, HairDeskAI, BarberDeskAI, SkinDeskAI, VetDeskAI, TheraDeskAI, LawDeskAI) tam uyumlu 16 haneli lisans anahtarı anında tanımlanır.
+                Tüm masaüstü yazılımlarımızla (DentDeskAI, HairDeskAI, BarberDeskAI ve SkinDeskAI) tam uyumlu 16 haneli lisans anahtarı anında tanımlanır.
             </p>
         </div>
 
@@ -276,41 +303,6 @@
                     </ul>
                 </div>
                 <button onclick="openPurchaseModal('12 Ay', '9.999 ₺')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">Satın Al</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- 4. ADMİN PANELİ (SADECE ermananasizz@gmail.com) -->
-    <section id="tab-admin" class="tab-content space-y-8">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-shield-halved mr-2"></i>Admin Kategori &amp; İşletme Yönetimi</h2>
-                <p class="text-xs text-slate-400 mt-1">Burada eklediğiniz/düzenlediğiniz kategori ve işletmeler AdminDesk ve uygulamalarla senkronize edilir.</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Kategori Yönetimi -->
-            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 space-y-4">
-                <h3 class="font-bold text-base">Kategoriler</h3>
-                <div class="flex gap-2">
-                    <input id="admin-new-cat-name" placeholder="Yeni kategori adı..." class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs">
-                    <button onclick="adminAddCategory()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold">Ekle</button>
-                </div>
-                <div id="admin-cat-list" class="space-y-2 max-h-72 overflow-y-auto"></div>
-            </div>
-
-            <!-- İşletme Yönetimi -->
-            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 space-y-4">
-                <h3 class="font-bold text-base">İşletmeler</h3>
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="admin-biz-cat" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs"></select>
-                    <input id="admin-biz-name" placeholder="İşletme Adı" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs">
-                    <input id="admin-biz-owner" placeholder="Yetkili Adı" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs">
-                    <input id="admin-biz-phone" placeholder="Telefon" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs">
-                </div>
-                <button onclick="adminAddBusiness()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold">Yeni İşletme Ekle</button>
-                <div id="admin-biz-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
             </div>
         </div>
     </section>
@@ -424,13 +416,34 @@
             </label>
         </div>
 
-        <button id="profile-admin-btn" onclick="closeModal('profile-modal'); switchTab('admin');" class="hidden w-full py-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-400 font-semibold text-xs hover:bg-amber-500/25 transition">
-            <i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Kategori &amp; İşletme Yönetimi
-        </button>
-
         <button onclick="logoutUser()" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition">
             <i class="fa-solid fa-right-from-bracket mr-1.5"></i>Çıkış Yap
         </button>
+    </div>
+</div>
+
+<!-- KATEGORİ EKLE / DÜZENLE MODAL -->
+<div id="cat-edit-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-7 max-w-md w-full shadow-2xl relative space-y-4">
+        <button onclick="closeModal('cat-edit-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <h3 id="cat-modal-title" class="text-lg font-bold">Kategori Ekle</h3>
+        <input type="hidden" id="cat-modal-id">
+        <input id="cat-modal-name" placeholder="Kategori Adı" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none">
+        <button onclick="saveCatModal()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Kaydet</button>
+    </div>
+</div>
+
+<!-- İŞLETME EKLE / DÜZENLE MODAL -->
+<div id="biz-edit-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-7 max-w-md w-full shadow-2xl relative space-y-3">
+        <button onclick="closeModal('biz-edit-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <h3 id="biz-modal-title" class="text-lg font-bold">İşletme Ekle</h3>
+        <input type="hidden" id="biz-modal-id">
+        <input id="biz-modal-name" placeholder="İşletme Adı" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm outline-none">
+        <input id="biz-modal-owner" placeholder="Yetkili Adı" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm outline-none">
+        <input id="biz-modal-phone" placeholder="Telefon" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm outline-none">
+        <input id="biz-modal-city" value="Manisa / Salihli" placeholder="Konum" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm outline-none">
+        <button onclick="saveBizModal()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs">Kaydet</button>
     </div>
 </div>
 
@@ -443,13 +456,13 @@
             <div id="modal-package-price" class="text-2xl font-extrabold text-emerald-400 mt-1">0 ₺</div>
         </div>
         <div class="space-y-2.5 text-xs bg-slate-100 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-            <div><span class="text-slate-400">Hesap Sahibi:</span> <b id="pay-holder">Erman Yıldız</b></div>
-            <div><span class="text-slate-400">Banka:</span> <b id="pay-bank">Ziraat Bankası</b></div>
+            <div><span class="text-slate-400">Ad Soyad:</span> <b id="pay-holder">Erman Anasız</b></div>
+            <div><span class="text-slate-400">Banka:</span> <b id="pay-bank">QNB Finansbank</b></div>
             <div><span class="text-slate-400">IBAN:</span> <b id="pay-iban" class="text-amber-400">TR33 0001 0000 0000 1234 5678 90</b></div>
-            <div><span class="text-slate-400">İletişim:</span> <b id="pay-contact">-</b></div>
+            <div><span class="text-slate-400">İletişim:</span> <b id="pay-contact">0552 377 8929</b></div>
         </div>
-        <p class="text-[11.5px] text-slate-400 text-center">Ödeme sonrası 16 haneli lisans anahtarınız hesabınıza ve uygulamanıza tanımlanacaktır.</p>
-        <button onclick="closeModal('purchase-modal'); showToast('Lisans talebiniz alındı, ekibimiz iletişime geçecektir.', 'success');" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Tamam</button>
+        <p class="text-[11.5px] text-slate-400 text-center">Satın almak için lütfen iletişime geçiniz.</p>
+        <button onclick="closeModal('purchase-modal')" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Tamam</button>
     </div>
 </div>
 
@@ -474,13 +487,46 @@
             { id: 'skindesk', name: 'Güzellik Salonları (SkinDeskAI)', icon: 'fa-wand-magic-sparkles' }
         ],
         businesses: [
-            { id: 'biz-1', category_id: 'klinikler', name: 'Manisa Özel Yıldız Diş Polikliniği', owner: 'Dt. Ali Yılmaz', phone: '0555 555 55 55', city: 'Manisa' },
-            { id: 'biz-barberdesk-1', category_id: 'barberdesk', name: 'BarberDeskAI Club', owner: 'Usta Berber', phone: '0555 000 00 00', city: 'İstanbul' },
-            { id: 'biz-hairdesk-1', category_id: 'hairdesk', name: 'HairDeskAI Stüdyo', owner: 'Kuaför Yetkilisi', phone: '0555 000 00 00', city: 'İstanbul' },
-            { id: 'biz-skindesk-1', category_id: 'skindesk', name: 'SkinDeskAI Estetik', owner: 'Uzman Estetisyen', phone: '0555 000 00 00', city: 'İstanbul' }
+            { id: 'biz-1', category_id: 'klinikler', name: 'Manisa Özel Yıldız Diş Polikliniği', owner: 'Dt. Ali Yılmaz', phone: '0555 555 55 55', city: 'Manisa / Salihli' },
+            { id: 'biz-barberdesk-1', category_id: 'barberdesk', name: 'BarberDeskAI Club', owner: 'Usta Berber', phone: '0555 000 00 00', city: 'Manisa / Salihli' },
+            { id: 'biz-hairdesk-1', category_id: 'hairdesk', name: 'HairDeskAI Stüdyo', owner: 'Kuaför Yetkilisi', phone: '0555 000 00 00', city: 'Manisa / Salihli' },
+            { id: 'biz-skindesk-1', category_id: 'skindesk', name: 'SkinDeskAI Estetik', owner: 'Uzman Estetisyen', phone: '0555 000 00 00', city: 'Manisa / Salihli' }
         ],
-        sales_payment_info: { account_holder: 'Erman Yıldız', bank_name: 'Ziraat Bankası', iban_number: 'TR33 0001 0000 0000 1234 5678 90', contact_info: '-' }
+        sales_payment_info: { account_holder: 'Erman Anasız', bank_name: 'QNB Finansbank', iban_number: 'TR33 0001 0000 0000 1234 5678 90', contact_info: '0552 377 8929' }
     };
+
+    let isLocationReady = false;
+
+    function handleCityChange() {
+        const city = document.getElementById('select-city').value;
+        const dist = document.getElementById('select-district');
+        dist.innerHTML = '<option value="">İlçe Seçin...</option>';
+        if (city === 'manisa') {
+            dist.innerHTML += '<option value="salihli">Salihli</option>';
+            dist.disabled = false;
+        } else {
+            dist.disabled = true;
+            isLocationReady = false;
+            document.getElementById('location-placeholder').classList.remove('hidden');
+            document.getElementById('ai-step-1').classList.add('hidden');
+            document.getElementById('ai-step-2').classList.add('hidden');
+            document.getElementById('ai-step-3').classList.add('hidden');
+        }
+    }
+
+    function handleDistrictChange() {
+        const dist = document.getElementById('select-district').value;
+        if (dist === 'salihli') {
+            isLocationReady = true;
+            document.getElementById('location-placeholder').classList.add('hidden');
+            renderAiCategories();
+            backToStep(1);
+        } else {
+            isLocationReady = false;
+            document.getElementById('location-placeholder').classList.remove('hidden');
+            document.getElementById('ai-step-1').classList.add('hidden');
+        }
+    }
 
     window.onload = async function() {
         const savedTheme = localStorage.getItem('erodesk_theme') || 'dark';
@@ -499,9 +545,11 @@
             const res = await fetch(`${API_BASE}/api/public/catalog`);
             if (!res.ok) throw new Error();
             const d = await res.json();
-            if (d.categories && d.categories.length) catalogData.categories = d.categories;
+            if (d.categories && d.categories.length) {
+                const hiddenIds = new Set(['vetdesk', 'theradesk', 'lawdesk', 'diger']);
+                catalogData.categories = d.categories.filter(c => !hiddenIds.has(c.id));
+            }
             if (d.businesses) catalogData.businesses = d.businesses;
-            if (d.sales_payment_info) catalogData.sales_payment_info = d.sales_payment_info;
             isBackendOnline = true;
             document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-emerald-400';
             document.getElementById('sync-label').innerText = 'AdminDesk Bağlı';
@@ -511,7 +559,9 @@
             document.getElementById('sync-label').innerText = 'Yerel Mod';
         }
         renderAiCategories();
-        if (currentUser && currentUser.email === ADMIN_EMAIL) renderAdminLists();
+        if (selectedCategory && !document.getElementById('ai-step-2').classList.contains('hidden')) {
+            selectAiCategory(selectedCategory.id);
+        }
     }
 
     function switchTab(tabId) {
@@ -519,26 +569,36 @@
         document.getElementById('tab-' + tabId)?.classList.add('active');
         document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-500/10', 'shadow-sm'));
         document.getElementById('tab-btn-' + tabId)?.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-500/10', 'shadow-sm');
-        if (tabId === 'ai') renderAiCategories();
-        if (tabId === 'admin') renderAdminLists();
+        if (tabId === 'ai' && isLocationReady) renderAiCategories();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function startCategoryFlow(catId) {
         switchTab('ai');
+        document.getElementById('select-city').value = 'manisa';
+        handleCityChange();
+        document.getElementById('select-district').value = 'salihli';
+        handleDistrictChange();
         selectAiCategory(catId);
     }
 
     function renderAiCategories() {
         const grid = document.getElementById('ai-category-grid');
         if (!grid) return;
+        const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
+        document.getElementById('btn-inline-add-cat')?.classList.toggle('hidden', !isAdmin);
         grid.innerHTML = catalogData.categories.map(c => `
-            <div onclick="selectAiCategory('${c.id}')" class="cursor-pointer p-5 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 hover:border-indigo-500 transition flex items-center space-x-4">
+            <div onclick="selectAiCategory('${c.id}')" class="relative cursor-pointer p-5 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 hover:border-indigo-500 transition flex items-center space-x-4">
+                ${isAdmin ? `
+                <div class="absolute top-3 right-3 flex gap-1.5" onclick="event.stopPropagation()">
+                    <button onclick="openCatModal('${c.id}', '${c.name.replace(/'/g, "\\'")}')" title="Düzenle" class="w-7 h-7 rounded-lg bg-sky-500/15 text-sky-400 hover:bg-sky-500 hover:text-white text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="adminDeleteCategory('${c.id}')" title="Sil" class="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500 hover:text-white text-xs"><i class="fa-solid fa-trash"></i></button>
+                </div>` : ''}
                 <div class="w-12 h-12 rounded-2xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-xl flex-shrink-0">
                     <i class="fa-solid ${c.icon || 'fa-desktop'}"></i>
                 </div>
                 <div>
-                    <div class="font-bold text-sm">${c.name}</div>
+                    <div class="font-bold text-sm pr-12">${c.name}</div>
                     <div class="text-[11px] text-slate-400 mt-0.5">${catalogData.businesses.filter(b => b.category_id === c.id).length} İşletme</div>
                 </div>
             </div>
@@ -548,15 +608,22 @@
     function selectAiCategory(catId) {
         selectedCategory = catalogData.categories.find(c => c.id === catId) || { id: catId, name: catId };
         document.getElementById('selected-cat-title').innerText = selectedCategory.name;
+        const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
+        document.getElementById('btn-inline-add-biz')?.classList.toggle('hidden', !isAdmin);
         const list = catalogData.businesses.filter(b => b.category_id === catId);
         const grid = document.getElementById('ai-business-grid');
         grid.innerHTML = list.length ? list.map(b => `
-            <div class="p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-4">
+            <div class="relative p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-4">
+                ${isAdmin ? `
+                <div class="absolute top-4 right-4 flex gap-1.5">
+                    <button onclick="openBizModal('${b.id}')" title="Düzenle" class="w-7 h-7 rounded-lg bg-sky-500/15 text-sky-400 hover:bg-sky-500 hover:text-white text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="adminDeleteBusiness('${b.id}')" title="Sil" class="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500 hover:text-white text-xs"><i class="fa-solid fa-trash"></i></button>
+                </div>` : ''}
                 <div>
-                    <h4 class="font-bold text-base">${b.name}</h4>
+                    <h4 class="font-bold text-base pr-14">${b.name}</h4>
                     <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-user-doctor mr-1.5 text-indigo-400"></i>${b.owner || '-'}</p>
                     <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-phone mr-1.5 text-emerald-400"></i>${b.phone || '-'}</p>
-                    <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-location-dot mr-1.5 text-rose-400"></i>${b.city || '-'}</p>
+                    <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-location-dot mr-1.5 text-rose-400"></i>Manisa / Salihli</p>
                 </div>
                 <button onclick="selectAiBusiness('${b.id}')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
                     <i class="fa-solid fa-robot mr-1.5"></i>AI Asistana Bağlan
@@ -798,13 +865,10 @@
     function updateAuthUI() {
         const actions = document.getElementById('auth-actions');
         const pill = document.getElementById('user-pill');
-        const adminTab = document.getElementById('tab-btn-admin');
-        const profileAdminBtn = document.getElementById('profile-admin-btn');
         if (!currentUser) {
             actions.classList.remove('hidden');
             pill.classList.add('hidden'); pill.classList.remove('flex');
-            adminTab.classList.add('hidden');
-            profileAdminBtn.classList.add('hidden');
+            if (isLocationReady) renderAiCategories();
             return;
         }
         const fullName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.email;
@@ -817,8 +881,7 @@
         document.getElementById('profile-full-name').innerText = fullName;
         document.getElementById('profile-email-text').innerText = currentUser.email;
         document.getElementById('profile-role-badge').innerText = isAdmin ? 'Sistem Yöneticisi (Admin)' : 'Kayıtlı Üye';
-        adminTab.classList.toggle('hidden', !isAdmin);
-        profileAdminBtn.classList.toggle('hidden', !isAdmin);
+        if (isLocationReady) renderAiCategories();
     }
 
     function toggleThemeSwitch(isDark, notify = true) {
@@ -829,48 +892,26 @@
         if (notify) showToast(isDark ? 'Koyu tema aktif.' : 'Açık tema aktif.', 'info');
     }
 
-    // ADMİN İŞLEMLERİ
-    function renderAdminLists() {
-        const catList = document.getElementById('admin-cat-list');
-        const bizSel = document.getElementById('admin-biz-cat');
-        const bizList = document.getElementById('admin-biz-list');
-        if (!catList || !bizSel || !bizList) return;
-        catList.innerHTML = catalogData.categories.map(c => `
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-xs">
-                <span><i class="fa-solid ${c.icon || 'fa-folder'} mr-2 text-indigo-400"></i><b>${c.name}</b></span>
-                <div class="flex gap-2">
-                    <button onclick="adminEditCategory('${c.id}', '${c.name.replace(/'/g, "\\'")}')" class="text-sky-400 hover:underline">Düzenle</button>
-                    <button onclick="adminDeleteCategory('${c.id}')" class="text-rose-400 hover:underline">Sil</button>
-                </div>
-            </div>
-        `).join('');
-        bizSel.innerHTML = catalogData.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        bizList.innerHTML = catalogData.businesses.map(b => `
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-xs">
-                <div><b>${b.name}</b> <span class="text-slate-400">(${b.owner || '-'})</span></div>
-                <button onclick="adminDeleteBusiness('${b.id}')" class="text-rose-400 hover:underline">Sil</button>
-            </div>
-        `).join('');
+    // SATIR İÇİ ADMİN MODAL İŞLEMLERİ (KATEGORİ & İŞLETME EKLE / DÜZENLE / SİL)
+    function openCatModal(id = '', name = '') {
+        document.getElementById('cat-modal-id').value = id;
+        document.getElementById('cat-modal-name').value = name;
+        document.getElementById('cat-modal-title').innerText = id ? 'Kategori Düzenle' : 'Yeni Kategori Ekle';
+        openModal('cat-edit-modal');
     }
 
-    async function adminAddCategory() {
-        const name = document.getElementById('admin-new-cat-name').value.trim();
+    async function saveCatModal() {
+        const id = document.getElementById('cat-modal-id').value.trim();
+        const name = document.getElementById('cat-modal-name').value.trim();
         if (!name) return;
         if (isBackendOnline) {
-            await fetch(`${API_BASE}/api/categories/add`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ name, icon: 'fa-building' }) });
+            const url = id ? `${API_BASE}/api/categories/update` : `${API_BASE}/api/categories/add`;
+            const body = id ? { id, name } : { name, icon: 'fa-building' };
+            await fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
             await syncCatalogFromAdminDesk();
         }
-        document.getElementById('admin-new-cat-name').value = '';
-        showToast('Kategori eklendi.', 'success');
-    }
-
-    async function adminEditCategory(id, oldName) {
-        const name = prompt('Yeni kategori adı:', oldName);
-        if (!name || !name.trim()) return;
-        if (isBackendOnline) {
-            await fetch(`${API_BASE}/api/categories/update`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id, name: name.trim() }) });
-            await syncCatalogFromAdminDesk();
-        }
+        closeModal('cat-edit-modal');
+        showToast(id ? 'Kategori güncellendi.' : 'Kategori eklendi.', 'success');
     }
 
     async function adminDeleteCategory(id) {
@@ -881,18 +922,35 @@
         }
     }
 
-    async function adminAddBusiness() {
-        const category_id = document.getElementById('admin-biz-cat').value;
-        const name = document.getElementById('admin-biz-name').value.trim();
-        const owner = document.getElementById('admin-biz-owner').value.trim();
-        const phone = document.getElementById('admin-biz-phone').value.trim();
+    function openBizModal(bizId = '') {
+        const biz = bizId ? catalogData.businesses.find(b => b.id === bizId) : null;
+        document.getElementById('biz-modal-id').value = biz ? biz.id : '';
+        document.getElementById('biz-modal-name').value = biz ? (biz.name || '') : '';
+        document.getElementById('biz-modal-owner').value = biz ? (biz.owner || '') : '';
+        document.getElementById('biz-modal-phone').value = biz ? (biz.phone || '') : '';
+        document.getElementById('biz-modal-city').value = 'Manisa / Salihli';
+        document.getElementById('biz-modal-title').innerText = biz ? 'İşletme Düzenle' : 'Yeni İşletme Ekle';
+        openModal('biz-edit-modal');
+    }
+
+    async function saveBizModal() {
+        const id = document.getElementById('biz-modal-id').value.trim();
+        const name = document.getElementById('biz-modal-name').value.trim();
+        const owner = document.getElementById('biz-modal-owner').value.trim();
+        const phone = document.getElementById('biz-modal-phone').value.trim();
+        const city = document.getElementById('biz-modal-city').value.trim() || 'Manisa / Salihli';
         if (!name) return;
         if (isBackendOnline) {
-            await fetch(`${API_BASE}/api/businesses/add`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ category_id, name, owner, phone }) });
+            const url = id ? `${API_BASE}/api/businesses/update` : `${API_BASE}/api/businesses/add`;
+            const body = id
+                ? { id, name, owner, phone, city }
+                : { category_id: selectedCategory?.id || 'klinikler', name, owner, phone, city };
+            await fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
             await syncCatalogFromAdminDesk();
         }
-        document.getElementById('admin-biz-name').value = '';
-        showToast('İşletme eklendi ve senkronize edildi!', 'success');
+        closeModal('biz-edit-modal');
+        if (selectedCategory) selectAiCategory(selectedCategory.id);
+        showToast(id ? 'İşletme güncellendi.' : 'İşletme eklendi.', 'success');
     }
 
     async function adminDeleteBusiness(id) {
@@ -901,16 +959,16 @@
             await fetch(`${API_BASE}/api/businesses/delete`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id }) });
             await syncCatalogFromAdminDesk();
         }
+        if (selectedCategory) selectAiCategory(selectedCategory.id);
     }
 
     function openPurchaseModal(period, price) {
         document.getElementById('modal-package-title').innerText = period + ' Lisans Paketi';
         document.getElementById('modal-package-price').innerText = price;
-        const sp = catalogData.sales_payment_info || {};
-        document.getElementById('pay-holder').innerText = sp.account_holder || 'Erman Yıldız';
-        document.getElementById('pay-bank').innerText = sp.bank_name || 'Ziraat Bankası';
-        document.getElementById('pay-iban').innerText = sp.iban_number || 'TR33 0001 0000 0000 1234 5678 90';
-        document.getElementById('pay-contact').innerText = sp.contact_info || '-';
+        document.getElementById('pay-holder').innerText = 'Erman Anasız';
+        document.getElementById('pay-bank').innerText = 'QNB Finansbank';
+        document.getElementById('pay-iban').innerText = 'TR33 0001 0000 0000 1234 5678 90';
+        document.getElementById('pay-contact').innerText = '0552 377 8929';
         openModal('purchase-modal');
     }
 
