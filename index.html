@@ -633,7 +633,30 @@
         backToStep(2);
     }
 
-    function selectAiBusiness(bizId) {
+    let siteChatPollTimer = null;
+
+    async function loadLiveAppConversation() {
+        if (!selectedBusiness || document.getElementById('ai-step-3').classList.contains('hidden')) return;
+        const phone = document.getElementById('ai-customer-phone').value.trim() || currentUser?.phone || '0532 111 22 33';
+        try {
+            const res = await fetch(`${API_BASE}/api/public/conversation?category_id=${encodeURIComponent(selectedCategory?.id || 'klinikler')}&phone=${encodeURIComponent(phone)}`);
+            const d = await res.json();
+            if (d.connected_app && Array.isArray(d.messages)) {
+                const c = document.getElementById('chat-messages');
+                const html = d.messages.map(m => m.role === 'inbound'
+                    ? `<div class="flex justify-end"><div class="bg-indigo-600 text-white rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(m.content || '')}</div></div>`
+                    : `<div class="flex justify-start"><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(m.content || '')}</div></div>`
+                ).join('');
+                if (c.dataset.lastHtml !== html) {
+                    c.innerHTML = html;
+                    c.dataset.lastHtml = html;
+                    c.scrollTop = c.scrollHeight;
+                }
+            }
+        } catch (e) {}
+    }
+
+    async function selectAiBusiness(bizId) {
         selectedBusiness = catalogData.businesses.find(b => b.id === bizId);
         if (!selectedBusiness) return;
         document.getElementById('ai-chat-title').innerText = `${selectedBusiness.name} • AI Asistan`;
@@ -641,9 +664,16 @@
         if (currentUser && currentUser.phone) document.getElementById('ai-customer-phone').value = currentUser.phone;
         chatStep = 0;
         apptData = { time: '', service: '', note: '', phone: '', name: '' };
-        document.getElementById('chat-messages').innerHTML = '';
-        appendAiMsg(`Merhaba! ${selectedBusiness.name} yapay zeka asistanıyım. "Saat 2 boş mu?" veya istediğiniz işlem/saat hakkında soru sorabilirsiniz.`);
+        const c = document.getElementById('chat-messages');
+        c.innerHTML = '';
+        c.dataset.lastHtml = '';
         backToStep(3);
+        await loadLiveAppConversation();
+        if (!c.innerHTML) {
+            appendAiMsg(`Merhaba! Size nasıl yardımcı olabilirim?\nRandevu işlemleri, fiyatlar, adresimiz, çalışma saatlerimiz veya ${selectedBusiness.name} hakkında öğrenmek istediğiniz her konuda sorularınızı iletebilirsiniz.`);
+        }
+        if (siteChatPollTimer) clearInterval(siteChatPollTimer);
+        siteChatPollTimer = setInterval(loadLiveAppConversation, 3000);
     }
 
     function backToStep(step) {
@@ -678,8 +708,8 @@
                     })
                 });
                 const d = await res.json();
-                if (d.connected_app && d.reply) {
-                    appendAiMsg(d.reply);
+                if (d.connected_app) {
+                    await loadLiveAppConversation();
                     return;
                 }
             } catch (err) {}
