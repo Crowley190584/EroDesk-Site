@@ -824,8 +824,10 @@
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
     // AUTH + 6 HANELİ KOD + ŞİFREMİ UNUTTUM
+    let isRegSending = false;
     async function handleRegisterSendCode(e) {
         e.preventDefault();
+        if (isRegSending) return;
         const first_name = document.getElementById('reg-first').value.trim();
         const last_name = document.getElementById('reg-last').value.trim();
         const phone = document.getElementById('reg-phone').value.trim();
@@ -839,23 +841,31 @@
         }
         if (password.length < 8) { showToast('Şifre en az 8 karakter olmalıdır.', 'error'); return; }
         pendingRegEmail = email;
+        isRegSending = true;
+        const submitBtn = e.target ? e.target.querySelector('button[type="submit"]') : null;
+        if (submitBtn) submitBtn.disabled = true;
 
-        if (isBackendOnline) {
-            const res = await fetch(`${API_BASE}/api/public/auth/send_code`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ first_name, last_name, phone, email, password })
-            });
-            const d = await res.json();
-            if (!res.ok) { showToast(d.error || 'Kayıt hatası', 'error'); return; }
-            document.getElementById('reg-code-info').innerHTML = d.email_sent
-                ? `<b>${email}</b> adresine <b>destek.erodesk@gmail.com</b> üzerinden 6 haneli doğrulama kodu gönderildi.`
-                : `Doğrulama kodunuz: <b class="text-amber-400 text-base">${d.dev_code}</b>`;
-        } else {
-            localPendingCode = String(Math.floor(100000 + Math.random() * 900000));
-            document.getElementById('reg-code-info').innerHTML = `AdminDesk bağlı olmadığı için yerel test kodu: <b class="text-amber-400 text-base">${localPendingCode}</b>`;
+        try {
+            if (isBackendOnline) {
+                const res = await fetch(`${API_BASE}/api/public/auth/send_code`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ first_name, last_name, phone, email, password })
+                });
+                const d = await res.json();
+                if (!res.ok) { showToast(d.error || 'Kayıt hatası', 'error'); return; }
+                document.getElementById('reg-code-info').innerHTML = d.email_sent
+                    ? `<b>${email}</b> adresine <b>destek.erodesk@gmail.com</b> üzerinden 6 haneli doğrulama kodu gönderildi.`
+                    : `Doğrulama kodunuz: <b class="text-amber-400 text-base">${d.dev_code}</b>`;
+            } else {
+                localPendingCode = String(Math.floor(100000 + Math.random() * 900000));
+                document.getElementById('reg-code-info').innerHTML = `AdminDesk bağlı olmadığı için yerel test kodu: <b class="text-amber-400 text-base">${localPendingCode}</b>`;
+            }
+            document.getElementById('reg-step-1').classList.add('hidden');
+            document.getElementById('reg-step-2').classList.remove('hidden');
+        } finally {
+            isRegSending = false;
+            if (submitBtn) submitBtn.disabled = false;
         }
-        document.getElementById('reg-step-1').classList.add('hidden');
-        document.getElementById('reg-step-2').classList.remove('hidden');
     }
 
     async function handleRegisterVerifyCode() {
