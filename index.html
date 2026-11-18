@@ -1,428 +1,4 @@
-<!DOCTYPE html>
-<html lang="tr" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EroDesk | Profesyonel Masaüstü Yazılım Çözümleri & Akıllı Ekosistem</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#0b0f19',
-                        darkCard: '#131d31',
-                        darkBorder: '#1e293b'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Font Inter & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300 selection:bg-indigo-500 selection:text-white">
-
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
-
-    <!-- Navigation Header -->
-    <header class="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-[#0b0f19]/80 border-b border-slate-200 dark:border-slate-800/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <!-- Brand Logo -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
-                <div class="bg-gradient-to-br from-indigo-500 to-cyan-500 text-white p-2.5 rounded-2xl shadow-lg shadow-indigo-500/20 flex items-center justify-center font-black text-xl w-11 h-11">
-                    ED
-                </div>
-                <div>
-                    <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
-                        EroDesk
-                    </span>
-                    <span class="block text-[10px] text-slate-500 dark:text-slate-400 font-mono tracking-wider uppercase">erodesk.com.tr</span>
-                </div>
-            </div>
-
-            <!-- Navigation Tabs -->
-            <nav class="hidden md:flex items-center space-x-1 bg-slate-100 dark:bg-slate-900/50 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800/60 text-sm font-medium">
-                <button onclick="switchTab('home')" id="tab-btn-home" class="nav-tab-btn px-4 py-2 rounded-xl transition font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 shadow-sm">
-                    <i class="fa-solid fa-house mr-2"></i>Ana Sayfa
-                </button>
-                <button onclick="switchTab('businesses')" id="tab-btn-businesses" class="nav-tab-btn px-4 py-2 rounded-xl transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                    <i class="fa-solid fa-store mr-2"></i>İşletmeler
-                </button>
-                <button onclick="switchTab('ai-appointment')" id="tab-btn-ai-appointment" class="nav-tab-btn px-4 py-2 rounded-xl transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 flex items-center">
-                    <i class="fa-solid fa-robot mr-2 text-cyan-500 dark:text-cyan-400"></i>AI Randevu
-                    <span class="ml-1.5 px-1.5 py-0.2 bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 text-[10px] rounded-full font-mono">Aktif</span>
-                </button>
-                <button onclick="switchTab('pricing')" id="tab-btn-pricing" class="nav-tab-btn px-4 py-2 rounded-xl transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                    <i class="fa-solid fa-tag mr-2"></i>Satın Al
-                </button>
-            </nav>
-
-            <!-- Actions & Auth State -->
-            <div class="flex items-center space-x-3">
-                <!-- Theme Toggle Button -->
-                <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800/50 hover:bg-slate-300 dark:hover:bg-slate-700 transition text-slate-700 dark:text-slate-300" title="Tema Değiştir">
-                    <i id="theme-icon" class="fa-solid fa-sun"></i>
-                </button>
-
-                <!-- Auth Section Container -->
-                <div id="auth-actions" class="flex items-center space-x-2">
-                    <button onclick="openModal('login-modal')" class="px-4 py-2 text-sm font-medium rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
-                        Giriş Yap
-                    </button>
-                    <button onclick="openModal('register-modal')" class="px-4 py-2 text-sm font-medium rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition">
-                        Kayıt Ol
-                    </button>
-                </div>
-
-                <!-- User Profile Pill -->
-                <div id="user-pill" class="hidden items-center space-x-3 pl-2 cursor-pointer bg-slate-200/60 dark:bg-slate-900/60 px-3 py-1.5 rounded-2xl border border-slate-300 dark:border-slate-800" onclick="openModal('profile-modal')">
-                    <img id="nav-user-avatar" src="https://placehold.co/100x100/4f46e5/ffffff?text=U" class="w-8 h-8 rounded-full object-cover border-2 border-indigo-500" alt="Profil">
-                    <div class="hidden lg:block text-left">
-                        <div id="nav-user-name" class="text-xs font-semibold text-slate-900 dark:text-slate-100">Kullanıcı</div>
-                        <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">Aktif Hesap</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Mobile Navigation Bar -->
-        <div class="md:hidden flex items-center justify-around border-t border-slate-200 dark:border-slate-800/50 py-2.5 bg-white/90 dark:bg-[#0b0f19]/90 text-xs">
-            <button onclick="switchTab('home')" class="mobile-tab-btn flex flex-col items-center text-indigo-600 dark:text-indigo-400" id="m-tab-home">
-                <i class="fa-solid fa-house text-sm mb-1"></i><span>Ana Sayfa</span>
-            </button>
-            <button onclick="switchTab('businesses')" class="mobile-tab-btn flex flex-col items-center text-slate-500 dark:text-slate-400" id="m-tab-businesses">
-                <i class="fa-solid fa-store text-sm mb-1"></i><span>İşletmeler</span>
-            </button>
-            <button onclick="switchTab('ai-appointment')" class="mobile-tab-btn flex flex-col items-center text-slate-500 dark:text-slate-400" id="m-tab-ai-appointment">
-                <i class="fa-solid fa-robot text-sm mb-1"></i><span>AI Randevu</span>
-            </button>
-            <button onclick="switchTab('pricing')" class="mobile-tab-btn flex flex-col items-center text-slate-500 dark:text-slate-400" id="m-tab-pricing">
-                <i class="fa-solid fa-tag text-sm mb-1"></i><span>Satın Al</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Content Area with Multi-Tab Architecture -->
-    <main class="flex-grow">
-        
-        <!-- TAB 1: ANA SAYFA -->
-        <section id="tab-home" class="tab-content active">
-            <!-- Hero Section -->
-            <div class="relative overflow-hidden py-20 lg:py-28 border-b border-slate-200 dark:border-slate-800/50">
-                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-transparent pointer-events-none"></div>
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-                    <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-semibold mb-6 shadow-sm">
-                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                        <span>erodesk.com.tr | Profesyonel Yazılım Çözümleri</span>
-                    </div>
-                    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight mb-6 text-slate-900 dark:text-slate-100">
-                        İşletmeniz İçin Profesyonel <span class="bg-gradient-to-r from-indigo-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">Masaüstü Yazılımları</span>
-                    </h1>
-                    <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10">
-                        Klinikler, kuaförler ve güzellik merkezleri için geliştirilen yerel otomasyonlar ve akıllı randevu sistemleri.
-                    </p>
-                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                        <button onclick="switchTab('businesses')" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-xl shadow-indigo-600/30 transition flex items-center justify-center space-x-2">
-                            <span>İşletmeleri & Vitrini Keşfet</span>
-                            <i class="fa-solid fa-arrow-right text-xs"></i>
-                        </button>
-                        <button onclick="switchTab('pricing')" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold transition flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-tag text-teal-500 dark:text-teal-400"></i>
-                            <span>Yazılım Paketlerini İncele</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Software Suites Overview -->
-            <div class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight mb-4 text-slate-900 dark:text-slate-100">Geliştirdiğimiz Yazılım Çözümleri</h2>
-                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">Sektörünüze özel tasarlanmış yüksek performanslı masaüstü uygulamaları.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="p-8 rounded-3xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 transition shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl mb-6 shadow-inner">
-                            <i class="fa-solid fa-tooth"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-3 text-slate-900 dark:text-slate-100">DentDesk & AI</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">Diş klinikleri ve muayenehaneler için hasta takip, tedavi planı ve akıllı randevu yönetimi.</p>
-                    </div>
-
-                    <div class="p-8 rounded-3xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/50 transition shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center text-xl mb-6 shadow-inner">
-                            <i class="fa-solid fa-spray-can-sparkles"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-3">SkinDesk & HairDesk</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">Güzellik salonları, cilt bakım merkezleri ve kuaförler için profesyonel müşteri ve işlem takibi.</p>
-                    </div>
-
-                    <div class="p-8 rounded-3xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-teal-500/50 transition shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center text-xl mb-6 shadow-inner">
-                            <i class="fa-solid fa-user-tie"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-3">BarberDesk & HairDesk</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">Erkek ve kadın kuaförleri için sıra, randevu ve personel prim otomasyonu.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- TAB 2: İŞLETMELER -->
-        <section id="tab-businesses" class="tab-content py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12">
-                    <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold border border-indigo-500/20 mb-3 inline-block">Bölgesel İşletme Vitrini</span>
-                    <h2 class="text-3xl font-extrabold tracking-tight mb-3 text-slate-900 dark:text-slate-100">İşletme Rehberi</h2>
-                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">İşletmeleri ve ekran vitrinlerini görmek için yukarıdan yaşadığınız il ve ilçe seçimini yapınız.</p>
-                </div>
-
-                <!-- Location Selectors (Manisa / Salihli only) -->
-                <div class="max-w-2xl mx-auto p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl mb-12 transition-colors">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">İl Seçiniz</label>
-                            <select id="select-city" onchange="handleCityChange()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition text-slate-900 dark:text-slate-200">
-                                <option value="">İl Seçin...</option>
-                                <option value="manisa">Manisa</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">İlçe Seçiniz</label>
-                            <select id="select-district" onchange="handleDistrictChange()" disabled class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-900 dark:text-slate-200">
-                                <option value="">Önce İl Seçin...</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Category Section -->
-                <div id="category-section" class="hidden transition-all duration-500">
-                    <div class="flex flex-wrap justify-between items-center mb-8 gap-4">
-                        <div class="flex flex-wrap gap-3">
-                            <button onclick="filterCategory('klinik')" id="btn-cat-klinik" class="category-btn px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-medium hover:border-indigo-500 transition flex items-center space-x-2 shadow-sm text-sm">
-                                <i class="fa-solid fa-tooth text-indigo-500"></i>
-                                <span>Diş Klinikleri</span>
-                            </button>
-                            <button onclick="filterCategory('erkek')" id="btn-cat-erkek" class="category-btn px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-medium hover:border-indigo-500 transition flex items-center space-x-2 shadow-sm text-sm">
-                                <i class="fa-solid fa-user-tie text-blue-500"></i>
-                                <span>Erkek Kuaförleri</span>
-                            </button>
-                            <button onclick="filterCategory('kadin')" id="btn-cat-kadin" class="category-btn px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-medium hover:border-indigo-500 transition flex items-center space-x-2 shadow-sm text-sm">
-                                <i class="fa-solid fa-scissors text-pink-500"></i>
-                                <span>Kadın Kuaförleri</span>
-                            </button>
-                            <button onclick="filterCategory('guzellik')" id="btn-cat-guzellik" class="category-btn px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-medium hover:border-indigo-500 transition flex items-center space-x-2 shadow-sm text-sm">
-                                <i class="fa-solid fa-wand-magic-sparkles text-teal-500"></i>
-                                <span>Güzellik Salonları</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Business Cards Grid -->
-                    <div id="business-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
-                </div>
-
-                <!-- Initial Notice -->
-                <div id="showcase-placeholder" class="text-center py-20 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl max-w-3xl mx-auto bg-white/50 dark:bg-slate-900/50">
-                    <i class="fa-solid fa-map-location-dot text-5xl text-slate-400 mb-4"></i>
-                    <p class="text-slate-600 dark:text-slate-400 text-base">İşletmeleri ve ekran vitrinlerini görmek için yukarıdan <span class="text-indigo-600 dark:text-indigo-400 font-bold">yaşadığınız il ve ilçe seçimini</span> yapınız.</p>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- TAB 3: AI RANDEVU ASİSTANI -->
-        <section id="tab-ai-appointment" class="tab-content py-16">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-8">
-                    <span class="px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-semibold border border-cyan-500/20 mb-3 inline-block">Yapay Zeka Asistanı</span>
-                    <h2 class="text-3xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-slate-100">Akıllı Randevu Botu</h2>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm">Seçtiğiniz işletme ve sisteme özel yapay zeka ile anında randevu oluşturun.</p>
-                </div>
-
-                <!-- Selected Business Banner in AI Chat -->
-                <div id="ai-active-business-banner" class="mb-6 p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-between text-sm">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
-                            <i class="fa-solid fa-store"></i>
-                        </div>
-                        <div>
-                            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-mono">Seçilen İşletme</div>
-                            <div id="ai-banner-biz-name" class="font-bold text-slate-900 dark:text-slate-100">Henüz işletme seçilmedi (Genel Mod)</div>
-                        </div>
-                    </div>
-                    <button onclick="switchTab('businesses')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition">
-                        İşletme Değiştir
-                    </button>
-                </div>
-
-                <!-- Chat Container -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[550px] transition-colors">
-                    <div class="bg-slate-100 dark:bg-slate-950 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold text-lg border border-cyan-500/20">
-                                <i class="fa-solid fa-robot"></i>
-                            </div>
-                            <div>
-                                <h3 id="ai-chat-title" class="text-sm font-bold text-slate-900 dark:text-slate-100">DentDeskAI Randevu Asistanı</h3>
-                                <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono flex items-center">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1.5 animate-pulse"></span>
-                                    Aktif ve Hazır
-                                </p>
-                            </div>
-                        </div>
-                        <button onclick="resetChat()" class="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 transition">
-                            Sohbeti Sıfırla
-                        </button>
-                    </div>
-
-                    <!-- Chat Messages Area -->
-                    <div id="chat-messages" class="flex-grow p-6 overflow-y-auto space-y-4 text-sm bg-slate-50/50 dark:bg-slate-900/50">
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-shrink-0 text-xs border border-cyan-500/20">AI</div>
-                            <div id="ai-initial-msg" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 max-w-lg text-slate-800 dark:text-slate-300 shadow-sm">
-                                Merhaba! DentDeskAI klinik asistanıyım. "Saat 2 boş mu?" diyerek randevu sürecini başlatabilirsiniz.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Chat Input Area -->
-                    <div class="p-4 bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-                        <form onsubmit="handleChatSubmit(event)" class="flex items-center space-x-2">
-                            <input type="text" id="chat-input" placeholder="Yazmaya başlayın..." class="flex-grow bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition text-slate-900 dark:text-slate-100">
-                            <button type="submit" class="px-6 py-3.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold shadow-lg shadow-cyan-600/30 transition">
-                                <i class="fa-solid fa-paper-plane"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 4: SATIN AL / LİSANS -->
-        <section id="tab-pricing" class="tab-content py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <span class="px-3 py-1 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 text-xs font-semibold border border-teal-500/20 mb-3 inline-block">Lisans & Paketler</span>
-                    <h2 class="text-3xl font-extrabold tracking-tight mb-3 text-slate-900 dark:text-slate-100">Yazılım Fiyat Listesi</h2>
-                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">İhtiyacınıza uygun profesyonel yazılım paketini seçin, anında kullanmaya başlayın.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-                    <!-- DentDeskAI -->
-                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl mb-4">
-                                <i class="fa-solid fa-tooth"></i>
-                            </div>
-                            <h3 class="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100">DentDeskAI</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Diş Klinikleri ve Muayenehaneler</p>
-                            <div class="text-3xl font-extrabold mb-6 text-slate-900 dark:text-slate-100">₺2.499<span class="text-xs font-normal text-slate-600 dark:text-slate-400"> / ay</span></div>
-                            <ul class="space-y-3 text-xs text-slate-700 dark:text-slate-300 mb-6">
-                                <li class="flex items-center"><i class="fa-solid fa-check text-indigo-500 mr-2"></i>Sınırsız Hasta Takibi</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-indigo-500 mr-2"></i>Akıllı Diş Kliniği AI Asistanı</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-indigo-500 mr-2"></i>Otomatik Randevu Bildirimleri</li>
-                            </ul>
-                        </div>
-                        <button onclick="openPurchaseModal('DentDeskAI', '₺2.499 / ay')" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow transition">
-                            Hemen Satın Al
-                        </button>
-                    </div>
-
-                    <!-- SkinDeskAI -->
-                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center text-xl mb-4">
-                                <i class="fa-solid fa-spray-can-sparkles"></i>
-                            </div>
-                            <h3 class="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100">SkinDeskAI</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Güzellik ve Cilt Bakım Merkezleri</p>
-                            <div class="text-3xl font-extrabold mb-6 text-slate-900 dark:text-slate-100">₺1.999<span class="text-xs font-normal text-slate-600 dark:text-slate-400"> / ay</span></div>
-                            <ul class="space-y-3 text-xs text-slate-700 dark:text-slate-300 mb-6">
-                                <li class="flex items-center"><i class="fa-solid fa-check text-teal-500 mr-2"></i>Seans ve Paket Takibi</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-teal-500 mr-2"></i>Güzellik Salonu AI Asistanı</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-teal-500 mr-2"></i>Müşteri Hatırlatıcıları</li>
-                            </ul>
-                        </div>
-                        <button onclick="openPurchaseModal('SkinDeskAI', '₺1.999 / ay')" class="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs shadow transition">
-                            Hemen Satın Al
-                        </button>
-                    </div>
-
-                    <!-- BarberDeskAI -->
-                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl mb-4">
-                                <i class="fa-solid fa-user-tie"></i>
-                            </div>
-                            <h3 class="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100">BarberDeskAI</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Erkek Kuaförleri ve Berberler</p>
-                            <div class="text-3xl font-extrabold mb-6 text-slate-900 dark:text-slate-100">₺1.499<span class="text-xs font-normal text-slate-600 dark:text-slate-400"> / ay</span></div>
-                            <ul class="space-y-3 text-xs text-slate-700 dark:text-slate-300 mb-6">
-                                <li class="flex items-center"><i class="fa-solid fa-check text-blue-500 mr-2"></i>Koltuk ve Sıra Yönetimi</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-blue-500 mr-2"></i>Erkek Kuaförü AI Asistanı</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-blue-500 mr-2"></i>Personel Prim Raporlama</li>
-                            </ul>
-                        </div>
-                        <button onclick="openPurchaseModal('BarberDeskAI', '₺1.499 / ay')" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow transition">
-                            Hemen Satın Al
-                        </button>
-                    </div>
-
-                    <!-- HairDeskAI -->
-                    <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="w-12 h-12 rounded-2xl bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center text-xl mb-4">
-                                <i class="fa-solid fa-scissors"></i>
-                            </div>
-                            <h3 class="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100">HairDeskAI</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Kadın Kuaförleri ve Güzellik</p>
-                            <div class="text-3xl font-extrabold mb-6 text-slate-900 dark:text-slate-100">₺1.799<span class="text-xs font-normal text-slate-600 dark:text-slate-400"> / ay</span></div>
-                            <ul class="space-y-3 text-xs text-slate-700 dark:text-slate-300 mb-6">
-                                <li class="flex items-center"><i class="fa-solid fa-check text-pink-500 mr-2"></i>Özel İşlem & Boya Takibi</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-pink-500 mr-2"></i>Kadın Kuaförü AI Asistanı</li>
-                                <li class="flex items-center"><i class="fa-solid fa-check text-pink-500 mr-2"></i>Online Randevu Paneli</li>
-                            </ul>
-                        </div>
-                        <button onclick="openPurchaseModal('HairDeskAI', '₺1.799 / ay')" class="w-full py-3 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-semibold text-xs shadow transition">
-                            Hemen Satın Al
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-[#0b0f19] border-t border-slate-200 dark:border-slate-800/80 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-600 dark:text-slate-400 gap-4">
-            <div class="flex items-center space-x-2">
-                <span class="font-bold text-slate-900 dark:text-slate-100">EroDesk</span>
-                <span>© 2026 erodesk.com.tr - Tüm hakları saklıdır.</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <span>Manisa / Salihli Bölge Bayii</span>
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>Sistem Aktif</span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript Application Logic -->
-    <script>
-        // Mock Data: Businesses in Manisa / Salihli
+// Mock Data: Businesses in Manisa / Salihli
         const businessesData = {
             klinik: [
                 { id: 'dent-1', name: 'Salihli Dent Diş Sağlığı Kliniği', category: 'klinik', phone: '0236 713 00 00', address: ' Mithatpaşa Mah. Atatürk Cad. No:45, Salihli/Manisa', image: 'https://placehold.co/600x400/4f46e5/ffffff?text=Salihli+Dent' },
@@ -445,11 +21,10 @@
         let currentActiveTab = 'home';
         let selectedCategory = null;
         let selectedBusiness = null;
-        let currentUser = null; // { name, email, role: 'admin'|'user' }
+        let currentUser = null;
 
         // Initialize App on Load
         window.onload = function() {
-            // Check saved user session
             const savedUser = localStorage.getItem('erodesk_current_user');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
@@ -522,7 +97,7 @@
             if (district === 'salihli') {
                 document.getElementById('showcase-placeholder').classList.add('hidden');
                 document.getElementById('category-section').classList.remove('hidden');
-                filterCategory('klinik'); // Default category
+                filterCategory('klinik');
                 showToast('Salihli işletmeleri yüklendi.', 'success');
             } else {
                 document.getElementById('category-section').classList.add('hidden');
@@ -571,35 +146,35 @@
             });
         }
 
-        // Select Business and Jump to AI Chat
+        // Select Business and Directly Connect to Category Specific AI App
         function selectBusinessAndChat(bizId, bizName, catKey) {
             selectedBusiness = { id: bizId, name: bizName, category: catKey };
             document.getElementById('ai-banner-biz-name').innerText = bizName;
             
-            const titles = {
-                klinik: 'DentDeskAI Randevu Asistanı',
-                erkek: 'BarberDeskAI Randevu Asistanı',
-                kadin: 'HairDeskAI Randevu Asistanı',
-                guzellik: 'SkinDeskAI Randevu Asistanı'
+            // Map categories directly to their dedicated AI applications
+            const appMapping = {
+                klinik: { name: 'DentDeskAI', port: '5000', title: 'DentDeskAI (Diş Klinikleri)' },
+                erkek: { name: 'BarberDeskAI', port: '5013', title: 'BarberDeskAI (Erkek Kuaförleri)' },
+                kadin: { name: 'HairDeskAI', port: '5011', title: 'HairDeskAI (Kadın Kuaförleri)' },
+                guzellik: { name: 'SkinDeskAI', port: '5012', title: 'SkinDeskAI (Güzellik Salonları)' }
             };
-            document.getElementById('ai-chat-title').innerText = titles[catKey] || 'AI Randevu Asistanı';
+
+            const targetApp = appMapping[catKey] || appMapping['klinik'];
+            document.getElementById('ai-chat-title').innerText = targetApp.title + ' • ' + bizName;
 
             const initialMsgs = {
                 klinik: `Merhaba! ${bizName} için DentDeskAI klinik asistanıyım. "Saat 2 boş mu?" diyerek randevu sürecini başlatabilirsiniz.`,
-                erkek: `Merhaba! ${bizName} için BarberDeskAI asistanıyım. Hangi işlem için randevu almak istiyorsunuz, not olarak ne yazmamı istersiniz?`,
-                kadin: `Merhaba! ${bizName} için HairDeskAI asistanıyım. Hangi işlem için randevu almak istiyorsunuz, not olarak ne yazmamı istersiniz?`,
-                guzellik: `Merhaba! ${bizName} için SkinDeskAI asistanıyım. Hangi işlem için randevu almak istiyorsunuz, not olarak ne yazmamı istersiniz?`
+                erkek: `Merhaba! ${bizName} için BarberDeskAI asistanıyım. Saç veya sakal tıraşı için randevu oluşturabilirim. Hangi saatte gelmek istersiniz?`,
+                kadin: `Merhaba! ${bizName} için HairDeskAI asistanıyım. Kesim, fön, boya veya bakım randevunuzu hemen oluşturalım. Hangi gün ve saat uygundur?`,
+                guzellik: `Merhaba! ${bizName} için SkinDeskAI asistanıyım. HydraFacial, epilasyon ve cilt bakım seansları için randevu talebinizi alabilirim.`
             };
             document.getElementById('ai-initial-msg').innerText = initialMsgs[catKey] || 'Merhaba! Randevu işlemlerinizde size nasıl yardımcı olabilirim?';
 
             switchTab('ai-appointment');
-            showToast(`${bizName} seçildi.`, 'success');
+            showToast(`${targetApp.name} (${bizName}) sistemine başarıyla bağlanıldı.`, 'success');
         }
 
         // AI Chatbot State Engine
-        let chatStep = 0;
-        let appointmentData = { time: '', service: '', note: '', phone: '' };
-
         function handleChatSubmit(e) {
             e.preventDefault();
             const input = document.getElementById('chat-input');
@@ -643,12 +218,159 @@
             const lower = text.toLowerCase();
 
             if (cat === 'klinik') {
-                // DentDeskAI Flow
+                // DentDeskAI (Diş Kliniği Botu)
                 if (chatStep === 0) {
                     if (lower.includes('saat 2') || lower.includes('saat 14') || lower.includes('2') || lower.includes('boş mu')) {
                         appointmentData.time = 'Saat 14:00';
                         chatStep = 1;
-                        appendAiMessage("Saat 14:00 uygun, dilerseniz randevunuzu oluşturabilirim. Şikayetiniz nedir, randevunuza not olarak ne yazmamı istersiniz?");
+                        appendAiMessage("Evet, saat 14:00 uygun! Dilerseniz randevunuzu oluşturabilirim. Şikayetiniz nedir, randevunuza not olarak ne yazmamı istersiniz?");
+                    } else {
+                        appointmentData.time = text;
+                        chatStep = 1;
+                        appendAiMessage(`Belirttiğiniz (${text}) saat için müsaitlik kontrolü yapıldı. Şikayetiniz nedir, randevunuza not olarak ne yazmamı istersiniz?`);
+                    }
+                } else if (chatStep === 1) {
+                    appointmentData.note = text;
+                    chatStep = 2;
+                    appendAiMessage("Harika! Randevunuzu onaylamak için lütfen telefon numaranızı yazar mısınız?");
+                } else if (chatStep === 2) {
+                    appointmentData.phone = text;
+                    appendAiMessage(`✅ [DentDeskAI] Randevunuz başarıyla oluşturuldu!\nİşletme: ${selectedBusiness?.name || 'Klinik'}\nZaman: ${appointmentData.time}\nNot: ${appointmentData.note}\nTelefon: ${appointmentData.phone}`);
+                    showToast('DentDeskAI Randevusu Kaydedildi!', 'success');
+                    chatStep = 0;
+                }
+            } else if (cat === 'erkek') {
+                // BarberDeskAI (Erkek Kuaförü Botu)
+                if (chatStep === 0) {
+                    appointmentData.service = text;
+                    chatStep = 1;
+                    appendAiMessage("Hangi gün ve saatte tıraş olmak istersiniz?");
+                } else if (chatStep === 1) {
+                    appointmentData.time = text;
+                    chatStep = 2;
+                    appendAiMessage("Saç/sakal kesiminiz için özel bir isteğiniz veya notunuz var mı? (İsterseniz geçebilirsiniz)");
+                } else if (chatStep === 2) {
+                    appointmentData.note = text;
+                    chatStep = 3;
+                    appendAiMessage("Randevunuzu kesinleştirmek için lütfen telefon numaranızı yazar mısınız?");
+                } else if (chatStep === 3) {
+                    appointmentData.phone = text;
+                    appendAiMessage(`✅ [BarberDeskAI] Koltuk randevunuz başarıyla oluşturuldu!\nİşlem: ${appointmentData.service}\nTarih/Saat: ${appointmentData.time}\nNot: ${appointmentData.note || 'Yok'}\nTel: ${appointmentData.phone}`);
+                    showToast('BarberDeskAI Randevusu Kaydedildi!', 'success');
+                    chatStep = 0;
+                }
+            } else if (cat === 'kadin') {
+                // HairDeskAI (Kadın Kuaförü Botu)
+                if (chatStep === 0) {
+                    appointmentData.service = text;
+                    chatStep = 1;
+                    appendAiMessage("Hangi gün ve saat için salonumuzda olmak istersiniz?");
+                } else if (chatStep === 1) {
+                    appointmentData.time = text;
+                    chatStep = 2;
+                    appendAiMessage("Kullanılacak boya markası, renk kodu veya özel bir model notunuz var mı?");
+                } else if (chatStep === 2) {
+                    appointmentData.note = text;
+                    chatStep = 3;
+                    appendAiMessage("Randevunuzu onaylamak için lütfen telefon numaranızı paylaşır mısınız?");
+                } else if (chatStep === 3) {
+        // Select Business and Jump to AI Chat
+        function selectBusinessAndChat(bizId, bizName, catKey) {
+            selectedBusiness = { id: bizId, name: bizName, category: catKey };
+            document.getElementById('ai-banner-biz-name').innerText = bizName;
+            
+            const titles = {
+                klinik: 'DentDeskAI (Diş Polikliniği) Asistanı',
+                erkek: 'BarberDeskAI (Erkek Kuaförü) Asistanı',
+                kadin: 'HairDeskAI (Kadın Kuaförü) Asistanı',
+                guzellik: 'SkinDeskAI (Güzellik Salonu) Asistanı'
+            };
+            document.getElementById('ai-chat-title').innerText = titles[catKey] || 'AI Randevu Asistanı';
+
+            const initialMsgs = {
+                klinik: `Merhaba! ${bizName} için DentDeskAI klinik asistanıyım. Muayene fiyatları, diş dolgusu, kanal tedavisi veya randevu işlemleri için sorularınızı iletebilirsiniz. "Saat 2 boş mu?" diyerek başlayabilirsiniz.`,
+                erkek: `Merhaba! ${bizName} için BarberDeskAI asistanıyım. Saç kesimi, sakal tıraşı, VIP bakım ve fiyatlarımız hakkında bilgi alabilir, randevunuzu hemen oluşturabilirsiniz.`,
+                kadin: `Merhaba! ${bizName} için HairDeskAI asistanıyım. Kesim, fön, dip boya, ombre, keratin bakım veya gelin saçı randevularınızda size yardımcı olmaktan memnuniyet duyarım.`,
+                guzellik: `Merhaba! ${bizName} için SkinDeskAI asistanıyım. HydraFacial cilt bakımı, lazer epilasyon, leke tedavisi veya seans paketlerimiz hakkında her şeyi sorabilirsiniz.`
+            };
+            document.getElementById('ai-initial-msg').innerText = initialMsgs[catKey] || 'Merhaba! Randevu işlemlerinizde size nasıl yardımcı olabilirim?';
+
+            switchTab('ai-appointment');
+            showToast(`${bizName} (${titles[catKey] || 'AI'}) aktif edildi.`, 'success');
+        }
+
+        // AI Chatbot State Engine with Sector-Specific Knowledge Base
+        let chatStep = 0;
+        let appointmentData = { time: '', service: '', note: '', phone: '' };
+
+        function handleChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendUserMessage(text);
+            input.value = '';
+
+            setTimeout(() => {
+                processAiResponse(text);
+            }, 600);
+        }
+
+        function appendUserMessage(text) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'flex items-start justify-end space-x-3';
+            div.innerHTML = `
+                <div class="bg-indigo-600 text-white rounded-2xl p-4 max-w-lg shadow-sm text-sm">${escapeHtml(text)}</div>
+                <div class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">Sen</div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendAiMessage(text) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'flex items-start space-x-3';
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-shrink-0 text-xs border border-cyan-500/20">AI</div>
+                <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 max-w-lg text-slate-800 dark:text-slate-300 shadow-sm text-sm whitespace-pre-line">${escapeHtml(text)}</div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function processAiResponse(text) {
+            const cat = selectedBusiness ? selectedBusiness.category : 'klinik';
+            const lower = text.toLowerCase();
+
+            // Sektörel Fiyat / Bilgi Soru Yanıtları
+            if (lower.includes('fiyat') || lower.includes('ne kadar') || lower.includes('ücret')) {
+                if (cat === 'klinik') {
+                    appendAiMessage("Güncel tedavi ve muayene fiyat rehberimiz:\n- İlk Muayene & Röntgen: Ücretsiz / 500 ₺\n- Diş Taşı Temizliği: 1.500 ₺ - 2.200 ₺\n- Kanal Tedavisi: 3.200 ₺ - 5.500 ₺\n- Zirkonyum Kaplama: 6.000 ₺ - 8.500 ₺");
+                } else if (cat === 'erkek') {
+                    appendAiMessage("Barber Shop hizmet & fiyat rehberimiz:\n- Saç Kesimi & Yıkama: 450 ₺ - 650 ₺\n- Sakal Kesimi & Buharlı Bakım: 250 ₺ - 350 ₺\n- Saç + Sakal + Maske VIP: 750 ₺ - 950 ₺");
+                } else if (cat === 'kadin') {
+                    appendAiMessage("Kadın Kuaförü hizmet & fiyat rehberimiz:\n- Kesim & Fön: 650 ₺ - 1.000 ₺\n- Dip Boya: 1.300 ₺ - 1.900 ₺\n- Ombre / Sombre: 4.500 ₺ - 7.500 ₺");
+                } else if (cat === 'guzellik') {
+                    appendAiMessage("Medikal Estetik & Cilt Bakım fiyatlarımız:\n- HydraFacial Cilt Bakımı: 1.500 ₺\n- Lazer Epilasyon Tüm Vücut: 2.200 ₺\n- Dermapen & Kolajen: 2.000 ₺ - 3.200 ₺");
+                }
+                return;
+            }
+
+            if (lower.includes('adres') || lower.includes('nerede')) {
+                appendAiMessage(`Kliniğimizin / Salonumuzun adresi: ${selectedBusiness ? selectedBusiness.address : 'Salihli / Manisa'}`);
+                return;
+            }
+
+            if (cat === 'klinik') {
+                // DentDeskAI Akış
+                if (chatStep === 0) {
+                    if (lower.includes('saat 2') || lower.includes('saat 14') || lower.includes('2') || lower.includes('boş mu')) {
+                        appointmentData.time = 'Saat 14:00';
+                        chatStep = 1;
+                        appendAiMessage("Evet, saat 14:00 uygun! Dilerseniz randevunuzu oluşturabilirim. Şikayetiniz nedir, randevunuza not olarak ne yazmamı istersiniz?");
                     } else {
                         appointmentData.time = text;
                         chatStep = 1;
@@ -665,7 +387,7 @@
                     chatStep = 0;
                 }
             } else {
-                // BarberDeskAI, HairDeskAI, SkinDeskAI Flow
+                // BarberDeskAI, HairDeskAI, SkinDeskAI Akışları
                 if (chatStep === 0) {
                     appointmentData.service = text;
                     chatStep = 1;
