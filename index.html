@@ -467,7 +467,7 @@
 </div>
 
 <script>
-    const API_BASE = 'http://127.0.0.1:5050';
+    const API_BASE = 'https://api.erodesk.com.tr';
     const ADMIN_EMAIL = 'ermananasizz@gmail.com';
     let isBackendOnline = false;
     let currentUser = null;
@@ -552,7 +552,7 @@
             if (d.businesses) catalogData.businesses = d.businesses;
             isBackendOnline = true;
             document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-emerald-400';
-            document.getElementById('sync-label').innerText = 'AdminDesk Bağlı';
+            document.getElementById('sync-label').innerText = 'Canlı Bağlı';
         } catch (e) {
             isBackendOnline = false;
             document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-amber-400';
@@ -644,7 +644,7 @@
 
         if (isBackendOnline) {
             try {
-                const res = await fetch(`${API_BASE}/api/public/conversation?category_id=${encodeURIComponent(catId)}&phone=${encodeURIComponent(phone)}`);
+                const res = await fetch(`${API_BASE}/api/public/conversation?business_id=${encodeURIComponent(selectedBusiness.id)}&category_id=${encodeURIComponent(catId)}&phone=${encodeURIComponent(phone)}`);
                 const d = await res.json();
                 if (d.connected_app && Array.isArray(d.messages)) msgs = d.messages;
             } catch (e) {}
