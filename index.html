@@ -729,6 +729,7 @@
                         business_id: selectedBusiness?.id || '',
                         business_name: selectedBusiness?.name || '',
                         customer_phone: phone,
+                        customer_name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim(),
                         message: txt
                     })
                 });
