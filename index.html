@@ -633,27 +633,44 @@
         backToStep(2);
     }
 
+    const APP_PORTS = { klinikler: 5000, hairdesk: 5011, skindesk: 5012, barberdesk: 5013 };
     let siteChatPollTimer = null;
 
     async function loadLiveAppConversation() {
         if (!selectedBusiness || document.getElementById('ai-step-3').classList.contains('hidden')) return;
         const phone = document.getElementById('ai-customer-phone').value.trim() || currentUser?.phone || '0532 111 22 33';
-        try {
-            const res = await fetch(`${API_BASE}/api/public/conversation?category_id=${encodeURIComponent(selectedCategory?.id || 'klinikler')}&phone=${encodeURIComponent(phone)}`);
-            const d = await res.json();
-            if (d.connected_app && Array.isArray(d.messages)) {
-                const c = document.getElementById('chat-messages');
-                const html = d.messages.map(m => m.role === 'inbound'
-                    ? `<div class="flex justify-end"><div class="bg-indigo-600 text-white rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(m.content || '')}</div></div>`
-                    : `<div class="flex justify-start"><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(m.content || '')}</div></div>`
-                ).join('');
-                if (c.dataset.lastHtml !== html) {
-                    c.innerHTML = html;
-                    c.dataset.lastHtml = html;
-                    c.scrollTop = c.scrollHeight;
-                }
+        const catId = selectedCategory?.id || 'klinikler';
+        let msgs = null;
+
+        if (isBackendOnline) {
+            try {
+                const res = await fetch(`${API_BASE}/api/public/conversation?category_id=${encodeURIComponent(catId)}&phone=${encodeURIComponent(phone)}`);
+                const d = await res.json();
+                if (d.connected_app && Array.isArray(d.messages)) msgs = d.messages;
+            } catch (e) {}
+        }
+
+        if (!msgs) {
+            const port = APP_PORTS[catId] || 5000;
+            try {
+                const res = await fetch(`http://127.0.0.1:${port}/api/conversation/${encodeURIComponent(phone)}`);
+                const d = await res.json();
+                if (Array.isArray(d.messages)) msgs = d.messages;
+            } catch (e) {}
+        }
+
+        if (msgs) {
+            const c = document.getElementById('chat-messages');
+            const html = msgs.map(m => m.role === 'inbound'
+                ? `<div class="flex justify-end"><div class="bg-indigo-600 text-white rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(m.content || '')}</div></div>`
+                : `<div class="flex justify-start"><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(m.content || '')}</div></div>`
+            ).join('');
+            if (c.dataset.lastHtml !== html) {
+                c.innerHTML = html;
+                c.dataset.lastHtml = html;
+                c.scrollTop = c.scrollHeight;
             }
-        } catch (e) {}
+        }
     }
 
     async function selectAiBusiness(bizId) {
@@ -694,13 +711,15 @@
         inp.value = '';
         const phone = document.getElementById('ai-customer-phone').value.trim() || currentUser?.phone || '0532 111 22 33';
 
+        const catId = selectedCategory?.id || 'klinikler';
+
         if (isBackendOnline) {
             try {
                 const res = await fetch(`${API_BASE}/api/public/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        category_id: selectedCategory?.id || 'klinikler',
+                        category_id: catId,
                         business_id: selectedBusiness?.id || '',
                         business_name: selectedBusiness?.name || '',
                         customer_phone: phone,
@@ -714,15 +733,34 @@
                 }
             } catch (err) {}
         }
+
+        const port = APP_PORTS[catId] || 5000;
+        try {
+            const res = await fetch(`http://127.0.0.1:${port}/api/patient_incoming`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: txt, phone_number: phone })
+            });
+            if (res.ok) {
+                await loadLiveAppConversation();
+                return;
+            }
+        } catch (err) {}
+
         processOfflineSectorAi(txt);
     }
 
     function processOfflineSectorAi(txt) {
         const catId = selectedCategory?.id || 'klinikler';
         const lower = txt.toLowerCase();
+        if (lower.includes('merhaba') || lower.includes('selam') || lower.includes('iyi günler')) {
+            appendAiMsg(`Merhaba! Size nasıl yardımcı olabilirim? Randevu işlemleri, fiyatlar, adresimiz veya çalışma saatlerimiz hakkında sorularınızı iletebilirsiniz.`);
+            return;
+        }
         if (catId === 'klinikler') {
             if (chatStep === 0) {
-                apptData.time = lower.includes('2') || lower.includes('14') ? '14:00' : txt;
+                const timeMatch = lower.match(/\b(\d{1,2}[:.]\d{2}|\d{1,2})\b/);
+                apptData.time = timeMatch ? (timeMatch[1].includes(':') ? timeMatch[1] : `${timeMatch[1]}:00`) : '14:00';
                 chatStep = 1;
                 appendAiMsg(`Evet, saat ${apptData.time} boş! Dilerseniz randevunuzu oluşturabilirim, oluşturmamı ister misiniz?`);
             } else if (chatStep === 1) {
@@ -734,7 +772,8 @@
             }
         } else {
             if (chatStep === 0) {
-                apptData.time = lower.includes('2') || lower.includes('14') ? '14:00' : txt;
+                const timeMatch = lower.match(/\b(\d{1,2}[:.]\d{2}|\d{1,2})\b/);
+                apptData.time = timeMatch ? (timeMatch[1].includes(':') ? timeMatch[1] : `${timeMatch[1]}:00`) : '14:00';
                 chatStep = 1;
                 appendAiMsg(`Evet, bu saatimiz uygun! Hangi işlem için randevu almak istiyorsunuz, randevunuza not olarak ne yazmamı istersiniz? (İsterseniz boş bırakabilirsiniz.)`);
             } else {
