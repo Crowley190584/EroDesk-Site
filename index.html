@@ -461,7 +461,11 @@
             <div><span class="text-slate-400">IBAN:</span> <b id="pay-iban" class="text-amber-400">TR33 0001 0000 0000 1234 5678 90</b></div>
             <div><span class="text-slate-400">İletişim:</span> <b id="pay-contact">0552 377 8929</b></div>
         </div>
-        <p class="text-[11.5px] text-slate-400 text-center">Satın almak için lütfen iletişime geçiniz.</p>
+        <p class="text-[11.5px] text-slate-400 text-center">Satın almak için Shopier ile anında ödeyebilir veya IBAN üzerinden iletişime geçebilirsiniz.</p>
+        <a id="pay-shopier-btn" href="#" target="_blank" rel="noopener" class="hidden w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs text-center shadow-lg transition items-center justify-center space-x-2">
+            <i class="fa-solid fa-credit-card"></i>
+            <span>Shopier ile Kartla Güvenli Öde</span>
+        </a>
         <button onclick="closeModal('purchase-modal')" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Tamam</button>
     </div>
 </div>
@@ -550,6 +554,7 @@
                 catalogData.categories = d.categories.filter(c => !hiddenIds.has(c.id));
             }
             if (d.businesses) catalogData.businesses = d.businesses;
+            if (d.sales_payment_info) catalogData.sales_payment_info = d.sales_payment_info;
             isBackendOnline = true;
             document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-emerald-400';
             document.getElementById('sync-label').innerText = 'Canlı Bağlı';
@@ -1070,12 +1075,31 @@
     }
 
     function openPurchaseModal(period, price) {
+        const sp = catalogData.sales_payment_info || {};
         document.getElementById('modal-package-title').innerText = period + ' Lisans Paketi';
         document.getElementById('modal-package-price').innerText = price;
-        document.getElementById('pay-holder').innerText = 'Erman Anasız';
-        document.getElementById('pay-bank').innerText = 'QNB Finansbank';
-        document.getElementById('pay-iban').innerText = 'TR33 0001 0000 0000 1234 5678 90';
-        document.getElementById('pay-contact').innerText = '0552 377 8929';
+        document.getElementById('pay-holder').innerText = sp.account_holder || 'Erman Anasız';
+        document.getElementById('pay-bank').innerText = sp.bank_name || 'QNB Finansbank';
+        document.getElementById('pay-iban').innerText = sp.iban_number || 'TR33 0001 0000 0000 1234 5678 90';
+        document.getElementById('pay-contact').innerText = sp.contact_info || '0552 377 8929';
+        const linkMap = {
+            '1 Ay': sp.shopier_link_1m || '',
+            '3 Ay': sp.shopier_link_3m || '',
+            '6 Ay': sp.shopier_link_6m || '',
+            '12 Ay': sp.shopier_link_12m || ''
+        };
+        const shopierBtn = document.getElementById('pay-shopier-btn');
+        const link = linkMap[period] || '';
+        if (shopierBtn) {
+            if (link) {
+                shopierBtn.href = link;
+                shopierBtn.classList.remove('hidden');
+                shopierBtn.classList.add('flex');
+            } else {
+                shopierBtn.classList.add('hidden');
+                shopierBtn.classList.remove('flex');
+            }
+        }
         openModal('purchase-modal');
     }
 
