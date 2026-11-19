@@ -145,8 +145,8 @@
                 </div>
                 <div onclick="startCategoryFlow('skindesk')" class="pkg-card cursor-pointer p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 transition">
                     <div class="w-12 h-12 rounded-2xl bg-teal-500/15 text-teal-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                    <h3 class="font-bold text-base">Cilt Bakım &amp; Güzellik</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Lazer, cilt bakımı ve seans planlama</p>
+                    <h3 class="font-bold text-base">Güzellik Merkezleri</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Cilt bakımı, lazer epilasyon ve estetik randevuları</p>
                 </div>
             </div>
         </div>
@@ -265,7 +265,7 @@
                     <button id="btn-inline-add-biz" onclick="openBizModal()" class="hidden px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold">
                         <i class="fa-solid fa-plus mr-1"></i>İşletme Ekle
                     </button>
-                    <button onclick="backToStep(1)" class="text-xs font-semibold text-indigo-500 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i>Kategorilere Dön</button>
+                    <button onclick="backToStep(1)" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs font-bold transition inline-flex items-center gap-2 shadow-sm"><i class="fa-solid fa-arrow-left"></i><span>Kategorilere Dön</span></button>
                 </div>
             </div>
             <div id="ai-business-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
@@ -273,9 +273,9 @@
 
         <!-- ADIM 3: CANLI AI CHAT -->
         <div id="ai-step-3" class="hidden space-y-4">
-            <div class="flex items-center justify-between">
-                <button onclick="backToStep(2)" class="text-xs font-semibold text-indigo-500 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i>İşletmelere Dön</button>
-                <button onclick="resetChat()" class="text-xs font-semibold text-slate-500 hover:text-rose-500"><i class="fa-solid fa-rotate-right mr-1"></i>Sohbeti Sıfırla</button>
+            <div class="flex items-center justify-between gap-3">
+                <button onclick="backToStep(2)" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs font-bold transition inline-flex items-center gap-2 shadow-sm"><i class="fa-solid fa-arrow-left"></i><span>İşletmelere Dön</span></button>
+                <button onclick="resetChat()" class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 text-xs font-bold transition inline-flex items-center gap-1.5"><i class="fa-solid fa-rotate-right"></i><span>Sohbeti Sıfırla</span></button>
             </div>
 
             <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[540px]">
@@ -615,6 +615,9 @@
             try { currentUser = JSON.parse(saved); } catch(e) {}
         }
         updateAuthUI();
+        if (history && history.replaceState) {
+            history.replaceState({ tab: 'home', step: 1, catId: null, bizId: null }, '', '#home');
+        }
         await syncCatalogFromAdminDesk();
         setInterval(syncCatalogFromAdminDesk, 5000);
     };
@@ -644,22 +647,48 @@
         }
     }
 
-    function switchTab(tabId) {
+    function _pushNavState(tab, step = 1, catId = null, bizId = null) {
+        try {
+            if (!history || !history.pushState) return;
+            const cur = history.state || {};
+            if (cur.tab === tab && cur.step === step && cur.catId === catId && cur.bizId === bizId) return;
+            const hash = tab === 'ai' ? `#ai-${step}` : `#${tab}`;
+            history.pushState({ tab, step, catId, bizId }, '', hash);
+        } catch (e) {}
+    }
+
+    window.addEventListener('popstate', (ev) => {
+        const st = ev.state || { tab: 'home', step: 1, catId: null, bizId: null };
+        switchTab(st.tab || 'home', true);
+        if (st.tab === 'ai') {
+            if (st.step === 3 && st.bizId) {
+                if (st.catId) selectAiCategory(st.catId, true);
+                selectAiBusiness(st.bizId, true);
+            } else if (st.step === 2 && st.catId) {
+                selectAiCategory(st.catId, true);
+            } else {
+                backToStep(1, true);
+            }
+        }
+    });
+
+    function switchTab(tabId, fromPop = false) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tabId)?.classList.add('active');
         document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-500/10', 'shadow-sm'));
         document.getElementById('tab-btn-' + tabId)?.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-500/10', 'shadow-sm');
         if (tabId === 'ai' && isLocationReady) renderAiCategories();
+        if (!fromPop) _pushNavState(tabId, 1, null, null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function startCategoryFlow(catId) {
-        switchTab('ai');
+        switchTab('ai', true);
         document.getElementById('select-city').value = 'manisa';
         handleCityChange();
         document.getElementById('select-district').value = 'salihli';
         handleDistrictChange();
-        selectAiCategory(catId);
+        selectAiCategory(catId, false);
     }
 
     function renderAiCategories() {
@@ -685,7 +714,7 @@
         `).join('');
     }
 
-    function selectAiCategory(catId) {
+    function selectAiCategory(catId, fromPop = false) {
         selectedCategory = catalogData.categories.find(c => c.id === catId) || { id: catId, name: catId };
         document.getElementById('selected-cat-title').innerText = selectedCategory.name;
         const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
@@ -710,7 +739,7 @@
                 </button>
             </div>
         `).join('') : '<div class="col-span-3 text-center text-sm text-slate-400 py-8">Bu kategoride henüz işletme bulunmuyor.</div>';
-        backToStep(2);
+        backToStep(2, fromPop);
     }
 
     const APP_PORTS = { klinikler: 5000, hairdesk: 5011, skindesk: 5012, barberdesk: 5013 };
@@ -754,7 +783,7 @@
         }
     }
 
-    async function selectAiBusiness(bizId) {
+    async function selectAiBusiness(bizId, fromPop = false) {
         selectedBusiness = catalogData.businesses.find(b => b.id === bizId);
         if (!selectedBusiness) return;
         document.getElementById('ai-chat-title').innerText = `${selectedBusiness.name} • AI Asistan`;
@@ -765,7 +794,7 @@
         const c = document.getElementById('chat-messages');
         c.innerHTML = '';
         c.dataset.lastHtml = '';
-        backToStep(3);
+        backToStep(3, fromPop);
         await loadLiveAppConversation();
         if (!c.innerHTML) {
             appendAiMsg(`Merhaba! Size nasıl yardımcı olabilirim?\nRandevu işlemleri, fiyatlar, adresimiz, çalışma saatlerimiz veya ${selectedBusiness.name} hakkında öğrenmek istediğiniz her konuda sorularınızı iletebilirsiniz.`);
@@ -774,13 +803,16 @@
         siteChatPollTimer = setInterval(loadLiveAppConversation, 3000);
     }
 
-    function backToStep(step) {
+    function backToStep(step, fromPop = false) {
         [1, 2, 3].forEach(s => {
             document.getElementById('ai-step-' + s).classList.toggle('hidden', s !== step);
             const pill = document.getElementById('step-pill-' + s);
             if (s === step) pill.className = 'px-3 py-1.5 rounded-full bg-indigo-600 text-white';
             else pill.className = 'px-3 py-1.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500';
         });
+        if (!fromPop) {
+            _pushNavState('ai', step, selectedCategory?.id || null, step === 3 ? (selectedBusiness?.id || null) : null);
+        }
     }
 
     async function handleChatSubmit(e) {
