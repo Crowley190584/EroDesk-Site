@@ -575,23 +575,23 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">Ad</label>
-                    <input type="text" id="acct-first" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none">
+                    <input type="text" id="acct-first" readonly class="w-full bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 cursor-not-allowed outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">Soyad</label>
-                    <input type="text" id="acct-last" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none">
+                    <input type="text" id="acct-last" readonly class="w-full bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 cursor-not-allowed outline-none">
                 </div>
             </div>
             <div>
                 <label class="block text-xs font-medium text-slate-400 mb-1">Telefon Numarası</label>
-                <input type="text" id="acct-phone" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none">
+                <input type="text" id="acct-phone" readonly class="w-full bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 cursor-not-allowed outline-none">
             </div>
             <div>
                 <label class="block text-xs font-medium text-slate-400 mb-1">E-posta</label>
                 <input type="email" id="acct-email" readonly class="w-full bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 cursor-not-allowed outline-none">
             </div>
             <button onclick="saveAccountProfile()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition">
-                <i class="fa-solid fa-check mr-1.5"></i>Bilgileri Kaydet
+                <i class="fa-solid fa-check mr-1.5"></i>Profil Resmini Kaydet
             </button>
         </div>
     </div>
@@ -948,27 +948,28 @@
 
         const catId = selectedCategory?.id || 'klinikler';
 
-        if (isBackendOnline) {
-            try {
-                const res = await fetch(`${API_BASE}/api/public/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        category_id: catId,
-                        business_id: selectedBusiness?.id || '',
-                        business_name: selectedBusiness?.name || '',
-                        customer_phone: phone,
-                        customer_name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim(),
-                        message: txt
-                    })
-                });
+        try {
+            const res = await fetch(`${API_BASE}/api/public/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    category_id: catId,
+                    business_id: selectedBusiness?.id || '',
+                    business_name: selectedBusiness?.name || '',
+                    customer_phone: phone,
+                    customer_name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim(),
+                    message: txt
+                })
+            });
+            if (res.ok) {
+                isBackendOnline = true;
                 const d = await res.json();
                 if (d.connected_app) {
                     await loadLiveAppConversation();
                     return;
                 }
-            } catch (err) {}
-        }
+            }
+        } catch (err) {}
 
         const port = APP_PORTS[catId] || 5000;
         try {
@@ -1301,30 +1302,21 @@
     }
     async function saveAccountProfile() {
         if (!currentUser) return;
-        const first_name = document.getElementById('acct-first').value.trim();
-        const last_name = document.getElementById('acct-last').value.trim();
-        const phone = document.getElementById('acct-phone').value.trim();
-        if (!/^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,}$/.test(first_name) || !/^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,}$/.test(last_name)) {
-            showToast('Geçerli Ad ve Soyad girin (en az 2 harf).', 'error'); return;
-        }
-        if (phone.replace(/\D/g, '').length < 10) {
-            showToast('Geçerli bir telefon numarası girin (en az 10 hane).', 'error'); return;
-        }
-        if (isBackendOnline) {
+        try {
             const res = await fetch(`${API_BASE}/api/public/auth/update_profile`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: currentUser.email, first_name, last_name, phone, avatar_url: pendingAvatarUrl || '' })
+                body: JSON.stringify({ email: currentUser.email, avatar_url: pendingAvatarUrl || '' })
             });
             const d = await res.json();
             if (!res.ok) { showToast(d.error || 'Güncelleme hatası', 'error'); return; }
             currentUser = d.user;
-        } else {
-            currentUser = { ...currentUser, first_name, last_name, phone, avatar_url: pendingAvatarUrl || '' };
+        } catch (e) {
+            currentUser = { ...currentUser, avatar_url: pendingAvatarUrl || '' };
         }
         localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
         updateAuthUI();
         closeAccountSettingsView();
-        showToast('Hesap bilgileriniz güncellendi!', 'success');
+        showToast('Profil resminiz güncellendi!', 'success');
     }
 
     function toggleThemeSwitch(isDark, notify = true) {
