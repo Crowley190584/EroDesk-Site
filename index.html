@@ -590,10 +590,10 @@
 
     let catalogData = {
         categories: [
-            { id: 'klinikler', name: 'Diş Klinikleri (DentDeskAI)', icon: 'fa-tooth' },
-            { id: 'barberdesk', name: 'Erkek Kuaförleri (BarberDeskAI)', icon: 'fa-user-tie' },
-            { id: 'hairdesk', name: 'Kadın Kuaförleri (HairDeskAI)', icon: 'fa-scissors' },
-            { id: 'skindesk', name: 'Güzellik Salonları (SkinDeskAI)', icon: 'fa-wand-magic-sparkles' }
+            { id: 'klinikler', name: 'Diş Klinikleri', icon: 'fa-tooth' },
+            { id: 'barberdesk', name: 'Erkek Kuaförleri', icon: 'fa-user-tie' },
+            { id: 'hairdesk', name: 'Kadın Kuaförleri', icon: 'fa-scissors' },
+            { id: 'skindesk', name: 'Güzellik Merkezleri', icon: 'fa-wand-magic-sparkles' }
         ],
         businesses: [
             { id: 'biz-1', category_id: 'klinikler', name: 'Manisa Özel Yıldız Diş Polikliniği', owner: 'Dt. Ali Yılmaz', phone: '0555 555 55 55', city: 'Manisa / Salihli' },
@@ -658,8 +658,19 @@
             if (!res.ok) throw new Error();
             const d = await res.json();
             if (d.categories && d.categories.length) {
-                const hiddenIds = new Set(['vetdesk', 'theradesk', 'lawdesk', 'diger']);
-                catalogData.categories = d.categories.filter(c => !hiddenIds.has(c.id));
+                const hiddenIds = new Set(['vetdesk', 'theradesk', 'lawdesk', 'diger', 'guzellik']);
+                const cleanNames = {
+                    klinikler: 'Diş Klinikleri',
+                    hairdesk: 'Kadın Kuaförleri',
+                    barberdesk: 'Erkek Kuaförleri',
+                    skindesk: 'Güzellik Merkezleri'
+                };
+                catalogData.categories = d.categories
+                    .filter(c => !hiddenIds.has(c.id))
+                    .map(c => ({
+                        ...c,
+                        name: cleanNames[c.id] || String(c.name || '').replace(/\s*\([^)]*\)/g, '').trim()
+                    }));
             }
             if (d.businesses) catalogData.businesses = d.businesses;
             if (d.sales_payment_info) catalogData.sales_payment_info = d.sales_payment_info;
