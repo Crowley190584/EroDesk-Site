@@ -665,12 +665,18 @@
                     barberdesk: 'Erkek Kuaförleri',
                     skindesk: 'Güzellik Merkezleri'
                 };
+                const order = ['klinikler', 'barberdesk', 'hairdesk', 'skindesk'];
                 catalogData.categories = d.categories
                     .filter(c => !hiddenIds.has(c.id))
                     .map(c => ({
                         ...c,
                         name: cleanNames[c.id] || String(c.name || '').replace(/\s*\([^)]*\)/g, '').trim()
-                    }));
+                    }))
+                    .sort((a, b) => {
+                        const ia = order.indexOf(a.id);
+                        const ib = order.indexOf(b.id);
+                        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+                    });
             }
             if (d.businesses) catalogData.businesses = d.businesses;
             if (d.sales_payment_info) catalogData.sales_payment_info = d.sales_payment_info;
