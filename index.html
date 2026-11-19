@@ -414,6 +414,36 @@
         <h3 class="text-xl font-bold mb-5">Kayıt Ol</h3>
 
         <form id="reg-step-1" onsubmit="handleRegisterSendCode(event)" class="space-y-3">
+            <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <button type="button" id="reg-type-customer-btn" onclick="setRegAccountType('customer')" class="py-2 px-3 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow transition">
+                    <i class="fa-solid fa-user mr-1"></i>Müşteriyim
+                </button>
+                <button type="button" id="reg-type-business-btn" onclick="setRegAccountType('business')" class="py-2 px-3 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition">
+                    <i class="fa-solid fa-store mr-1"></i>İşletmeyim
+                </button>
+            </div>
+            <input type="hidden" id="reg-account-type" value="customer">
+            <div id="reg-biz-fields" class="hidden space-y-2.5 p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/25">
+                <div>
+                    <label class="block text-xs font-medium text-indigo-300 mb-1">İşletme Adı</label>
+                    <input type="text" id="reg-biz-name" placeholder="Örn: Yıldız Diş Polikliniği" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-indigo-300 mb-1">Sektör</label>
+                        <select id="reg-biz-cat" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs outline-none">
+                            <option value="klinikler">Diş Kliniği</option>
+                            <option value="hairdesk">Kadın Kuaförü</option>
+                            <option value="barberdesk">Erkek Kuaförü</option>
+                            <option value="skindesk">Güzellik Merkezi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-indigo-300 mb-1">İl / İlçe</label>
+                        <input type="text" id="reg-biz-city" value="Manisa / Salihli" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs outline-none">
+                    </div>
+                </div>
+            </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">Ad</label>
@@ -935,16 +965,41 @@
     }
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
+    function setRegAccountType(type) {
+        document.getElementById('reg-account-type').value = type;
+        const cBtn = document.getElementById('reg-type-customer-btn');
+        const bBtn = document.getElementById('reg-type-business-btn');
+        const bizBox = document.getElementById('reg-biz-fields');
+        const activeCls = ['bg-indigo-600', 'text-white', 'shadow'];
+        const idleCls = ['text-slate-500', 'dark:text-slate-400'];
+        if (type === 'business') {
+            bBtn.classList.add(...activeCls); bBtn.classList.remove(...idleCls);
+            cBtn.classList.remove(...activeCls); cBtn.classList.add(...idleCls);
+            bizBox.classList.remove('hidden');
+        } else {
+            cBtn.classList.add(...activeCls); cBtn.classList.remove(...idleCls);
+            bBtn.classList.remove(...activeCls); bBtn.classList.add(...idleCls);
+            bizBox.classList.add('hidden');
+        }
+    }
+
     // AUTH + 6 HANELİ KOD + ŞİFREMİ UNUTTUM
     let isRegSending = false;
     async function handleRegisterSendCode(e) {
         e.preventDefault();
         if (isRegSending) return;
+        const account_type = document.getElementById('reg-account-type').value || 'customer';
+        const biz_name = (document.getElementById('reg-biz-name')?.value || '').trim();
+        const biz_category = document.getElementById('reg-biz-cat')?.value || 'klinikler';
+        const biz_city = (document.getElementById('reg-biz-city')?.value || 'Manisa / Salihli').trim();
         const first_name = document.getElementById('reg-first').value.trim();
         const last_name = document.getElementById('reg-last').value.trim();
         const phone = document.getElementById('reg-phone').value.trim();
         const email = document.getElementById('reg-email').value.trim().toLowerCase();
         const password = document.getElementById('reg-password').value;
+        if (account_type === 'business' && biz_name.length < 2) {
+            showToast('Lütfen işletme adını girin.', 'error'); return;
+        }
         if (!/^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,}$/.test(first_name) || !/^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,}$/.test(last_name)) {
             showToast('Geçerli Ad ve Soyad girin (en az 2 harf).', 'error'); return;
         }
@@ -961,7 +1016,7 @@
             if (isBackendOnline) {
                 const res = await fetch(`${API_BASE}/api/public/auth/send_code`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ first_name, last_name, phone, email, password })
+                    body: JSON.stringify({ first_name, last_name, phone, email, password, account_type, biz_name, biz_category, biz_city })
                 });
                 const d = await res.json();
                 if (!res.ok) { showToast(d.error || 'Kayıt hatası', 'error'); return; }
