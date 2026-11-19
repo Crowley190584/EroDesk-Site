@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EroDesk | Yapay Zeka Destekli İşletme & Randevu Ekosistemi</title>
+    <link rel="icon" type="image/png" href="erodesk_icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -50,11 +51,9 @@
 <header class="sticky top-0 z-40 backdrop-blur-xl bg-white/85 dark:bg-[#0b0f19]/85 border-b border-slate-200 dark:border-slate-800/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/25">
-                <i class="fa-solid fa-layer-group text-lg"></i>
-            </div>
+            <img src="erodesk_icon.png" alt="EroDesk" class="w-10 h-10 rounded-xl shadow-lg shadow-indigo-600/25 object-cover">
             <div>
-                <div class="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white leading-none">EroDesk <span class="text-indigo-500">AI</span></div>
+                <div class="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white leading-none">EroDesk</div>
                 <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Akıllı İşletme &amp; Randevu Ekosistemi</div>
             </div>
         </div>
@@ -411,7 +410,10 @@
 <div id="register-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
     <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
         <button onclick="closeModal('register-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-        <h3 class="text-xl font-bold mb-5">Kayıt Ol</h3>
+        <div class="text-center mb-4">
+            <img src="erodesk_logo.png" alt="EroDesk" class="w-20 h-20 rounded-2xl mx-auto mb-2.5 shadow-lg object-cover border border-slate-700/60">
+            <h3 class="text-xl font-bold">Kayıt Ol</h3>
+        </div>
 
         <form id="reg-step-1" onsubmit="handleRegisterSendCode(event)" class="space-y-3">
             <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
