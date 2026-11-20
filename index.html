@@ -116,6 +116,10 @@
                             <i class="fa-solid fa-briefcase text-amber-400"></i>
                             <span>İşletmeler İçin</span>
                         </button>
+                        <button onclick="openModal('demo-lead-modal')" class="px-6 py-3.5 rounded-2xl bg-emerald-600/90 hover:bg-emerald-500 text-white font-semibold text-sm shadow-xl transition flex items-center space-x-2">
+                            <i class="fa-solid fa-phone-volume"></i>
+                            <span>Ücretsiz Demo İsteyin</span>
+                        </button>
                     </div>
                 </div>
                 <div class="flex-shrink-0 flex items-center justify-center">
@@ -403,6 +407,30 @@
     </div>
     <div class="text-[11px] opacity-75">© 2026 EroDesk — Akıllı İşletme &amp; Randevu Sistemi</div>
 </footer>
+
+<div id="demo-lead-modal" class="hidden fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-7 max-w-md w-full shadow-2xl relative space-y-4">
+        <button onclick="closeModal('demo-lead-modal')" class="absolute top-5 right-5 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div>
+            <h3 class="text-lg font-extrabold text-emerald-400"><i class="fa-solid fa-phone-volume mr-1.5"></i>İşletmenize Özel Ücretsiz Demo</h3>
+            <p class="text-xs text-slate-400 mt-1">Bilgilerinizi bırakın, ekibimiz işletmeniz için 10 gün ücretsiz kurulum ve canlı tanıtım yapsın.</p>
+        </div>
+        <form onsubmit="submitDemoLead(event)" class="space-y-3">
+            <input id="dl-biz" required placeholder="İşletme Adı (Örn: Yıldız Diş / Kuaför)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs outline-none">
+            <select id="dl-sec" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs outline-none">
+                <option value="Diş Kliniği (DentDeskAI)">Diş Kliniği (DentDeskAI)</option>
+                <option value="Kadın Kuaförü (HairDeskAI)">Kadın Kuaförü (HairDeskAI)</option>
+                <option value="Erkek Kuaförü (BarberDeskAI)">Erkek Kuaförü (BarberDeskAI)</option>
+                <option value="Güzellik Merkezi (SkinDeskAI)">Güzellik Merkezi (SkinDeskAI)</option>
+                <option value="Psikolog & Terapi (TheraDeskAI)">Psikolog &amp; Terapi (TheraDeskAI)</option>
+            </select>
+            <input id="dl-owner" required placeholder="Yetkili Ad Soyad" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs outline-none">
+            <input id="dl-phone" required placeholder="Cep Telefonu (05XX XXX XX XX)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs outline-none">
+            <input id="dl-city" placeholder="İl / İlçe (Örn: Manisa / Salihli)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs outline-none">
+            <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg">Ücretsiz Demo Talep Et</button>
+        </form>
+    </div>
+</div>
 
 <div id="legal-modal" class="hidden fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm items-center justify-center p-4">
     <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-lg w-full shadow-2xl relative space-y-3">
@@ -1505,6 +1533,28 @@
         pendingDeepBizId = '';
         startCategoryFlow(biz.category_id);
         setTimeout(() => selectAiBusiness(biz.id), 120);
+    }
+
+    async function submitDemoLead(e) {
+        e.preventDefault();
+        const biz_name = document.getElementById('dl-biz').value.trim();
+        const sector = document.getElementById('dl-sec').value;
+        const owner_name = document.getElementById('dl-owner').value.trim();
+        const phone = document.getElementById('dl-phone').value.trim();
+        const city = document.getElementById('dl-city').value.trim() || 'Türkiye';
+        try {
+            const res = await fetch(`${API_BASE}/api/public/demo_lead`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ biz_name, sector, owner_name, phone, city })
+            });
+            const d = await res.json();
+            if (!res.ok) { showToast(d.error || 'Lütfen bilgilerinizi kontrol edin.', 'error'); return; }
+            closeModal('demo-lead-modal');
+            e.target.reset();
+            showToast('Demo talebiniz alındı! Ekibimiz en kısa sürede sizi arayacaktır.', 'success');
+        } catch (err) {
+            showToast('Bağlantı hatası, lütfen tekrar deneyin.', 'error');
+        }
     }
 
     function openLegalModal(type) {
