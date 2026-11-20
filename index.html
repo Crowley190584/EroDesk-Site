@@ -1100,8 +1100,22 @@
         if (!/^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,}$/.test(first_name) || !/^[a-zA-ZçğıöşüÇĞİÖŞÜ\s]{2,}$/.test(last_name)) {
             showToast('Geçerli Ad ve Soyad girin (en az 2 harf).', 'error'); return;
         }
-        if (phone.replace(/\D/g, '').length < 10) {
-            showToast('Geçerli bir telefon numarası girin (en az 10 hane).', 'error'); return;
+        function isValidTrMobile(raw) {
+            let d = String(raw || '').replace(/\D/g, '');
+            if (d.startsWith('90') && d.length === 12) d = d.slice(2);
+            else if (d.startsWith('0') && d.length === 11) d = d.slice(1);
+            if (!/^5[013456]\d{8}$/.test(d)) return false;
+            if (new Set(d).size <= 2 || new Set(d.slice(3)).size < 3) return false;
+            if (/(\d)\1{4,}/.test(d)) return false;
+            const tail = d.slice(3);
+            for (let i = 0; i <= tail.length - 5; i++) {
+                const sub = tail.slice(i, i + 5);
+                if ('0123456789'.includes(sub) || '9876543210'.includes(sub)) return false;
+            }
+            return true;
+        }
+        if (!isValidTrMobile(phone)) {
+            showToast('Lütfen geçerli bir cep telefonu numarası girin (05XX XXX XX XX). 0850, 444 veya sahte/tekrarlı numaralar kabul edilmez.', 'error'); return;
         }
         if (password.length < 8) { showToast('Şifre en az 8 karakter olmalıdır.', 'error'); return; }
         pendingRegEmail = email;
