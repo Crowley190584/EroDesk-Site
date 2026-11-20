@@ -636,10 +636,10 @@
             <div><span class="text-slate-400">IBAN:</span> <b id="pay-iban" class="text-amber-400">TR33 0001 0000 0000 1234 5678 90</b></div>
             <div><span class="text-slate-400">İletişim:</span> <b id="pay-contact">0552 377 8929</b></div>
         </div>
-        <p class="text-[11.5px] text-slate-400 text-center">Satın almak için Shopier ile anında ödeyebilir veya IBAN üzerinden iletişime geçebilirsiniz.</p>
-        <a id="pay-shopier-btn" href="#" target="_blank" rel="noopener" class="hidden w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs text-center shadow-lg transition items-center justify-center space-x-2">
+        <p class="text-[11.5px] text-emerald-400/90 text-center font-medium"><i class="fa-solid fa-shield-halved mr-1"></i>Shopier 256-bit SSL &amp; 3D Secure Güvenli Ödeme altyapısı ile lisans anahtarınız ödeme sonrası anında e-postanıza iletilir.</p>
+        <a id="pay-shopier-btn" href="#" onclick="return openShopierMiniPopup(event, this.href);" class="hidden w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs text-center shadow-lg transition items-center justify-center space-x-2">
             <i class="fa-solid fa-credit-card"></i>
-            <span>Shopier ile Kartla Güvenli Öde</span>
+            <span>Satın Al</span>
         </a>
         <button onclick="closeModal('purchase-modal')" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Tamam</button>
     </div>
@@ -1424,6 +1424,17 @@
             }
         }
         openModal('purchase-modal');
+    }
+
+    function openShopierMiniPopup(e, url) {
+        if (!url || url === '#') return false;
+        e.preventDefault();
+        const w = 520, h = 720;
+        const left = Math.max(0, Math.round((window.screen.width - w) / 2));
+        const top = Math.max(0, Math.round((window.screen.height - h) / 2));
+        const win = window.open(url, 'ShopierSecurePay', `width=${w},height=${h},left=${left},top=${top},scrollbars=yes,resizable=yes`);
+        if (!win) window.open(url, '_blank', 'noopener');
+        return false;
     }
 
     function openModal(id) { const m = document.getElementById(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } }
