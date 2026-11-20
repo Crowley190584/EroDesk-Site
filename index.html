@@ -393,6 +393,26 @@
 
 </main>
 
+<footer class="border-t border-slate-200 dark:border-slate-800/80 py-6 px-4 text-center text-xs text-slate-500 dark:text-slate-400 space-y-2">
+    <div class="flex flex-wrap items-center justify-center gap-4 font-semibold">
+        <button onclick="openLegalModal('kvkk')" class="hover:text-indigo-400 transition">KVKK Aydınlatma Metni</button>
+        <span>•</span>
+        <button onclick="openLegalModal('privacy')" class="hover:text-indigo-400 transition">Gizlilik Politikası</button>
+        <span>•</span>
+        <button onclick="openLegalModal('distance')" class="hover:text-indigo-400 transition">Mesafeli Satış Sözleşmesi</button>
+    </div>
+    <div class="text-[11px] opacity-75">© 2026 EroDesk — Akıllı İşletme &amp; Randevu Sistemi</div>
+</footer>
+
+<div id="legal-modal" class="hidden fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-lg w-full shadow-2xl relative space-y-3">
+        <button onclick="closeModal('legal-modal')" class="absolute top-5 right-5 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <h3 id="legal-modal-title" class="text-base font-extrabold text-indigo-400"></h3>
+        <div id="legal-modal-body" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed max-h-80 overflow-y-auto space-y-2 whitespace-pre-line"></div>
+        <button onclick="closeModal('legal-modal')" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs">Okudum, Kapat</button>
+    </div>
+</div>
+
 <!-- GİRİŞ MODAL -->
 <div id="login-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
     <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
@@ -486,6 +506,10 @@
                 <label class="block text-xs font-medium text-slate-400 mb-1">Şifre (En az 8 karakter)</label>
                 <input type="password" id="reg-password" required minlength="8" placeholder="En az 8 karakter" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none">
             </div>
+            <label class="flex items-start space-x-2 text-[11px] text-slate-400 cursor-pointer">
+                <input type="checkbox" id="reg-kvkk-chk" required class="mt-0.5 accent-indigo-600">
+                <span><button type="button" onclick="openLegalModal('kvkk')" class="text-indigo-400 underline font-semibold">KVKK Aydınlatma Metni</button> ve <button type="button" onclick="openLegalModal('privacy')" class="text-indigo-400 underline font-semibold">Gizlilik Politikası</button>'nı okudum, onaylıyorum.</span>
+            </label>
             <button type="submit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg transition">Kayıt Ol</button>
         </form>
 
@@ -647,6 +671,7 @@
             <i class="fa-solid fa-credit-card"></i>
             <span>Satın Al</span>
         </a>
+        <div class="text-[10.5px] text-slate-400 text-center">Satın alarak <button type="button" onclick="openLegalModal('distance')" class="text-indigo-400 underline font-semibold">Mesafeli Satış Sözleşmesi</button>'ni kabul etmiş olursunuz.</div>
         <button onclick="closeModal('purchase-modal')" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Tamam</button>
     </div>
 </div>
@@ -1480,6 +1505,22 @@
         pendingDeepBizId = '';
         startCategoryFlow(biz.category_id);
         setTimeout(() => selectAiBusiness(biz.id), 120);
+    }
+
+    function openLegalModal(type) {
+        const titles = {
+            kvkk: 'KVKK Aydınlatma Metni',
+            privacy: 'Gizlilik Politikası',
+            distance: 'Mesafeli Satış Sözleşmesi'
+        };
+        const bodies = {
+            kvkk: '6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca, EroDesk platformuna kayıt ve randevu oluşturma sırasında paylaşılan Ad, Soyad, Telefon Numarası ve E-posta bilgileriniz yalnızca randevu yönetimi, işletme-müşteri iletişimi ve lisans aktivasyon süreçlerinin yürütülmesi amacıyla işlenir.\n\nVerileriniz güvenli HTTPS/SSL şifreli bulut sunucularında saklanır, izniniz dışında üçüncü kişilerle paylaşılmaz. KVKK m.11 kapsamında verilerinize erişim, düzeltme ve silme taleplerinizi destek.erodesk@gmail.com adresinden iletebilirsiniz.',
+            privacy: 'EroDesk, kullanıcı hesap güvenliğini ve işletme verilerinin gizliliğini en üst düzeyde korur. Şifreler tek yönlü kriptografik özet (SHA-256) ile saklanır. İşletmelerin hasta/müşteri ve randevu kayıtları yalnızca ilgili işletmenin yetkili cihazlarıyla senkronize edilir.',
+            distance: 'İşbu Mesafeli Satış Sözleşmesi, EroDesk dijital yazılım lisans paketlerinin (1 Ay, 3 Ay, 6 Ay, 12 Ay) elektronik ortamda satışı ve anında teslimi (16 haneli lisans anahtarı) hakkındadır.\n\nÖdeme Shopier 256-bit SSL & 3D Secure altyapısı üzerinden güvenli olarak tahsil edilir. Ödeme onayıyla birlikte 16 haneli dijital lisans anahtarı alıcının e-posta adresine anında gönderilir.'
+        };
+        document.getElementById('legal-modal-title').innerText = titles[type] || '';
+        document.getElementById('legal-modal-body').innerText = bodies[type] || '';
+        openModal('legal-modal');
     }
 
     function openModal(id) { const m = document.getElementById(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } }
