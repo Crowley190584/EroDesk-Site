@@ -707,6 +707,7 @@
             isLocationReady = true;
             document.getElementById('location-placeholder').classList.add('hidden');
             renderAiCategories();
+        openDeepBizChatIfReady();
             backToStep(1);
         } else {
             isLocationReady = false;
@@ -768,6 +769,7 @@
             document.getElementById('sync-label').innerText = 'Yerel Mod';
         }
         renderAiCategories();
+        openDeepBizChatIfReady();
         if (selectedCategory && !document.getElementById('ai-step-2').classList.contains('hidden')) {
             selectAiCategory(selectedCategory.id);
         }
@@ -1458,6 +1460,26 @@
         const win = window.open(url, 'ShopierSecurePay', `width=${w},height=${h},left=${left},top=${top},scrollbars=yes,resizable=yes`);
         if (!win) window.open(url, '_blank', 'noopener');
         return false;
+    }
+
+    let pendingDeepBizId = new URLSearchParams(window.location.search).get('biz') || '';
+    (function tryOpenMobileAppForBiz() {
+        if (!pendingDeepBizId) return;
+        const p = new URLSearchParams(window.location.search);
+        if (p.get('nofb') === '1') return;
+        if (/Android/i.test(navigator.userAgent || '')) {
+            const fb = encodeURIComponent(`https://www.erodesk.com.tr/?biz=${pendingDeepBizId}&nofb=1`);
+            window.location.href = `intent://biz/${encodeURIComponent(pendingDeepBizId)}#Intent;scheme=erodesk;package=com.erodesk.customer;S.browser_fallback_url=${fb};end`;
+        }
+    })();
+
+    function openDeepBizChatIfReady() {
+        if (!pendingDeepBizId) return;
+        const biz = (catalogData.businesses || []).find(b => String(b.id).toLowerCase() === pendingDeepBizId.toLowerCase());
+        if (!biz) return;
+        pendingDeepBizId = '';
+        startCategoryFlow(biz.category_id);
+        setTimeout(() => selectAiBusiness(biz.id), 120);
     }
 
     function openModal(id) { const m = document.getElementById(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } }
