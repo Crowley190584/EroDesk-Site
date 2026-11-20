@@ -152,6 +152,11 @@
                     <h3 class="font-bold text-base">Güzellik Merkezleri</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Cilt bakımı, lazer epilasyon ve estetik randevuları</p>
                 </div>
+                <div onclick="startCategoryFlow('theradesk')" class="pkg-card cursor-pointer p-6 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 transition">
+                    <div class="w-12 h-12 rounded-2xl bg-violet-500/15 text-violet-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-brain"></i></div>
+                    <h3 class="font-bold text-base">Psikolog &amp; Terapi</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Bireysel, çift, çocuk terapisi ve online seans randevuları</p>
+                </div>
             </div>
         </div>
 
@@ -443,6 +448,7 @@
                             <option value="hairdesk">Kadın Kuaförü</option>
                             <option value="barberdesk">Erkek Kuaförü</option>
                             <option value="skindesk">Güzellik Merkezi</option>
+                            <option value="theradesk">Psikolog &amp; Terapi Merkezi</option>
                         </select>
                     </div>
                     <div>
@@ -663,13 +669,15 @@
             { id: 'klinikler', name: 'Diş Klinikleri', icon: 'fa-tooth' },
             { id: 'barberdesk', name: 'Erkek Kuaförleri', icon: 'fa-user-tie' },
             { id: 'hairdesk', name: 'Kadın Kuaförleri', icon: 'fa-scissors' },
-            { id: 'skindesk', name: 'Güzellik Merkezleri', icon: 'fa-wand-magic-sparkles' }
+            { id: 'skindesk', name: 'Güzellik Merkezleri', icon: 'fa-wand-magic-sparkles' },
+            { id: 'theradesk', name: 'Psikolog & Terapi', icon: 'fa-brain' }
         ],
         businesses: [
             { id: 'biz-1', category_id: 'klinikler', name: 'Manisa Özel Yıldız Diş Polikliniği', owner: 'Dt. Ali Yılmaz', phone: '0555 555 55 55', city: 'Manisa / Salihli' },
             { id: 'biz-barberdesk-1', category_id: 'barberdesk', name: 'BarberDeskAI Club', owner: 'Usta Berber', phone: '0555 000 00 00', city: 'Manisa / Salihli' },
             { id: 'biz-hairdesk-1', category_id: 'hairdesk', name: 'HairDeskAI Stüdyo', owner: 'Kuaför Yetkilisi', phone: '0555 000 00 00', city: 'Manisa / Salihli' },
-            { id: 'biz-skindesk-1', category_id: 'skindesk', name: 'SkinDeskAI Estetik', owner: 'Uzman Estetisyen', phone: '0555 000 00 00', city: 'Manisa / Salihli' }
+            { id: 'biz-skindesk-1', category_id: 'skindesk', name: 'SkinDeskAI Estetik', owner: 'Uzman Estetisyen', phone: '0555 000 00 00', city: 'Manisa / Salihli' },
+            { id: 'biz-theradesk-1', category_id: 'theradesk', name: 'TheraDeskAI Danışmanlık', owner: 'Uzm. Psk. Selin Arslan', phone: '0555 000 00 00', city: 'Manisa / Salihli' }
         ],
         sales_payment_info: { account_holder: 'Erman Anasız', bank_name: 'QNB Finansbank', iban_number: 'TR33 0001 0000 0000 1234 5678 90', contact_info: '0552 377 8929' }
     };
@@ -728,14 +736,15 @@
             if (!res.ok) throw new Error();
             const d = await res.json();
             if (d.categories && d.categories.length) {
-                const hiddenIds = new Set(['vetdesk', 'theradesk', 'lawdesk', 'diger', 'guzellik']);
+                const hiddenIds = new Set(['vetdesk', 'lawdesk', 'diger', 'guzellik']);
                 const cleanNames = {
                     klinikler: 'Diş Klinikleri',
                     hairdesk: 'Kadın Kuaförleri',
                     barberdesk: 'Erkek Kuaförleri',
-                    skindesk: 'Güzellik Merkezleri'
+                    skindesk: 'Güzellik Merkezleri',
+                    theradesk: 'Psikolog & Terapi'
                 };
-                const order = ['klinikler', 'barberdesk', 'hairdesk', 'skindesk'];
+                const order = ['klinikler', 'barberdesk', 'hairdesk', 'skindesk', 'theradesk'];
                 catalogData.categories = d.categories
                     .filter(c => !hiddenIds.has(c.id))
                     .map(c => ({
@@ -859,7 +868,7 @@
         backToStep(2, fromPop);
     }
 
-    const APP_PORTS = { klinikler: 5000, hairdesk: 5011, skindesk: 5012, barberdesk: 5013 };
+    const APP_PORTS = { klinikler: 5000, hairdesk: 5011, skindesk: 5012, barberdesk: 5013, theradesk: 5016 };
     let siteChatPollTimer = null;
 
     async function loadLiveAppConversation() {
