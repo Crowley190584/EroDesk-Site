@@ -520,6 +520,35 @@
     </div>
 </div>
 
+<!-- RANDEVU YÖNTEMİ SEÇİM MODAL -->
+<div id="biz-mode-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-700 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 id="biz-mode-title" class="font-extrabold text-base">Randevu Yöntemi Seçin</h3>
+                <p class="text-xs text-slate-400 mt-0.5">İstediğiniz yöntemi seçin, içeriden de geçiş yapabilirsiniz.</p>
+            </div>
+            <button onclick="closeModal('biz-mode-modal')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="grid grid-cols-1 gap-3">
+            <button onclick="chooseSiteBizMode('calendar')" class="w-full p-4 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-left flex items-center gap-3.5 transition">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white text-lg flex-shrink-0" style="background:#3a8165;"><i class="fa-solid fa-calendar-days"></i></div>
+                <div>
+                    <div class="font-bold text-sm">Takvimden Randevu</div>
+                    <div class="text-xs text-slate-400 mt-0.5">Uygun gün ve saati tablodan seçerek hızlıca randevu alın</div>
+                </div>
+            </button>
+            <button onclick="chooseSiteBizMode('ai')" class="w-full p-4 rounded-2xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-left flex items-center gap-3.5 transition">
+                <div class="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-lg flex-shrink-0"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                    <div class="font-bold text-sm">AI Asistana Sor</div>
+                    <div class="text-xs text-slate-400 mt-0.5">Yapay zeka asistana sorarak bilgi alın ve randevu oluşturun</div>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- GİRİŞ MODAL -->
 <div id="login-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm items-center justify-center p-4">
     <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
@@ -1010,8 +1039,8 @@
                     <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-phone mr-1.5 text-emerald-400"></i>${b.phone || '-'}</p>
                     <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-location-dot mr-1.5 text-rose-400"></i>Manisa / Salihli</p>
                 </div>
-                <button onclick="selectAiBusiness('${b.id}')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
-                    <i class="fa-solid fa-robot mr-1.5"></i>AI Asistana Bağlan
+                <button onclick="openSiteModeChoice('${b.id}')" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
+                    <i class="fa-solid fa-calendar-check mr-1.5"></i>Randevu Al
                 </button>
             </div>
         `).join('') : '<div class="col-span-3 text-center text-sm text-slate-400 py-8">Bu kategoride henüz işletme bulunmuyor.</div>';
@@ -1059,11 +1088,39 @@
         }
     }
 
-    async function selectAiBusiness(bizId, fromPop = false) {
+    let pendingChoiceBizId = '';
+    function openSiteModeChoice(bizId) {
+        const b = catalogData.businesses.find(x => x.id === bizId);
+        if (!b) return;
+        pendingChoiceBizId = bizId;
+        const t = document.getElementById('biz-mode-title');
+        if (t) t.innerText = `${b.name} — Randevu Al`;
+        openModal('biz-mode-modal');
+    }
+    function chooseSiteBizMode(mode) {
+        closeModal('biz-mode-modal');
+        if (pendingChoiceBizId) selectAiBusiness(pendingChoiceBizId, false, mode);
+    }
+    function getSiteNotePlaceholder(catId) {
+        const map = {
+            klinikler: 'Yaptıracağınız işlem veya not (Örn: Muayene, Dolgu, Diş Çekimi...)',
+            hairdesk: 'Yaptıracağınız işlem veya not (Örn: Saç Kesimi, Fön, Boya, Bakım...)',
+            skindesk: 'Yaptıracağınız işlem veya not (Örn: Cilt Bakımı, Lazer Epilasyon, Peeling...)',
+            barberdesk: 'Yaptıracağınız işlem veya not (Örn: Saç-Sakal Tıraşı, Fön, Bakım...)',
+            theradesk: 'Yaptıracağınız işlem veya not (Örn: Ön Görüşme, Bireysel Terapi, Danışmanlık...)',
+            vetdesk: 'Yaptıracağınız işlem veya not (Örn: Genel Muayene, Aşı, Kontrol...)',
+            lawdesk: 'Yaptıracağınız işlem veya not (Örn: Hukuki Danışmanlık, Ön Görüşme...)'
+        };
+        return map[catId] || 'Yaptıracağınız işlem veya not (Örn: Muayene, Danışmanlık, Randevu Notu...)';
+    }
+
+    async function selectAiBusiness(bizId, fromPop = false, initialMode = 'calendar') {
         selectedBusiness = catalogData.businesses.find(b => b.id === bizId);
         if (!selectedBusiness) return;
-        document.getElementById('ai-chat-title').innerText = `${selectedBusiness.name} • AI Asistan`;
+        document.getElementById('ai-chat-title').innerText = `${selectedBusiness.name} • Randevu & Asistan`;
         document.getElementById('ai-chat-sub').innerText = `${selectedCategory?.name || ''} — Doğrudan gelen kutusuna entegre`;
+        const noteEl = document.getElementById('site-cal-note');
+        if (noteEl) noteEl.placeholder = getSiteNotePlaceholder(selectedCategory?.id || selectedBusiness.category_id);
         if (currentUser && currentUser.phone) document.getElementById('ai-customer-phone').value = currentUser.phone;
         chatStep = 0;
         apptData = { time: '', service: '', note: '', phone: '', name: '' };
@@ -1071,7 +1128,7 @@
         c.innerHTML = '';
         c.dataset.lastHtml = '';
         backToStep(3, fromPop);
-        switchBizMode('calendar');
+        switchBizMode(initialMode);
         loadSiteBizCalendar();
         await loadLiveAppConversation();
         if (!c.innerHTML) {
@@ -1154,11 +1211,11 @@
             return;
         }
         const hours = [];
-        for (let h = 9; h <= 18; h++) {
+        for (let h = 9; h < 18; h++) {
             hours.push(`${String(h).padStart(2,'0')}:00`);
             hours.push(`${String(h).padStart(2,'0')}:30`);
         }
-        hours.push('19:00');
+        hours.push('18:00');
         const bookedSet = new Set((siteCalData.booked || []).filter(b => b.day === siteCalSelectedDate).map(b => b.hour));
         (siteCalData.busy_slots || []).forEach(s => {
             const p = s.split(' ');
