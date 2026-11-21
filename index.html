@@ -298,12 +298,44 @@
 
         <!-- ADIM 3: CANLI AI CHAT -->
         <div id="ai-step-3" class="hidden space-y-4">
-            <div class="flex items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
                 <button onclick="backToStep(2)" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs font-bold transition inline-flex items-center gap-2 shadow-sm"><i class="fa-solid fa-arrow-left"></i><span>İşletmelere Dön</span></button>
-                <button onclick="resetChat()" class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 text-xs font-bold transition inline-flex items-center gap-1.5"><i class="fa-solid fa-rotate-right"></i><span>Sohbeti Sıfırla</span></button>
+                <div class="flex items-center gap-2 bg-slate-200 dark:bg-slate-900 p-1 rounded-2xl border border-slate-300 dark:border-slate-800">
+                    <button type="button" id="mode-btn-calendar" onclick="switchBizMode('calendar')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white transition"><i class="fa-solid fa-calendar-days mr-1.5"></i>Takvimden Randevu</button>
+                    <button type="button" id="mode-btn-ai" onclick="switchBizMode('ai')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-300 transition"><i class="fa-solid fa-robot mr-1.5"></i>AI Asistana Sor</button>
+                </div>
+                <button id="btn-reset-chat" onclick="resetChat()" class="hidden px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 text-xs font-bold transition inline-flex items-center gap-1.5"><i class="fa-solid fa-rotate-right"></i><span>Sohbeti Sıfırla</span></button>
             </div>
 
-            <div class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[540px]">
+            <div id="biz-calendar-panel" class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div>
+                        <div id="site-cal-biz-title" class="font-extrabold text-sm">Hızlı Randevu Takvimi</div>
+                        <div class="text-[11px] text-slate-400">Tarih ve uygun saat seçin; anında işletme takvimine düşsün.</div>
+                    </div>
+                    <div class="flex items-center gap-3 text-[11px] font-semibold">
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:#3a8165;"></span>Uygun</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>Dolu</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span>Kapalı / Tatil</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <input type="date" id="site-cal-date" onchange="onSiteCalDateChange(this.value)" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+                    <div id="site-cal-quick-days" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <div id="site-cal-slots" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2"></div>
+
+                <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-2.5">
+                    <input id="site-cal-note" type="text" placeholder="Yaptıracağınız işlem veya not (Örn: Dolgu, Saç kesimi, Cilt bakımı...)" class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl px-4 py-2.5 text-xs outline-none focus:border-indigo-500">
+                    <button type="button" onclick="bookSiteCalendarAppt()" class="px-5 py-2.5 rounded-2xl text-white font-bold text-xs shadow-lg transition flex items-center justify-center gap-2" style="background:#3a8165;">
+                        <i class="fa-solid fa-calendar-check"></i><span>Randevuyu Onayla</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="biz-ai-panel" class="hidden bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[540px]">
                 <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
@@ -1039,12 +1071,144 @@
         c.innerHTML = '';
         c.dataset.lastHtml = '';
         backToStep(3, fromPop);
+        switchBizMode('calendar');
+        loadSiteBizCalendar();
         await loadLiveAppConversation();
         if (!c.innerHTML) {
             appendAiMsg(`Merhaba! Size nasıl yardımcı olabilirim?\nRandevu işlemleri, fiyatlar, adresimiz, çalışma saatlerimiz veya ${selectedBusiness.name} hakkında öğrenmek istediğiniz her konuda sorularınızı iletebilirsiniz.`);
         }
         if (siteChatPollTimer) clearInterval(siteChatPollTimer);
         siteChatPollTimer = setInterval(loadLiveAppConversation, 3000);
+    }
+
+    let siteCalData = { booked: [], busy_slots: [], closed_days: [], holiday_dates: [] };
+    let siteCalSelectedDate = new Date().toISOString().slice(0, 10);
+    let siteCalSelectedHour = '';
+
+    function switchBizMode(mode) {
+        const isCal = (mode === 'calendar');
+        document.getElementById('biz-calendar-panel')?.classList.toggle('hidden', !isCal);
+        document.getElementById('biz-ai-panel')?.classList.toggle('hidden', isCal);
+        document.getElementById('btn-reset-chat')?.classList.toggle('hidden', isCal);
+        const bc = document.getElementById('mode-btn-calendar');
+        const ba = document.getElementById('mode-btn-ai');
+        if (bc) bc.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${isCal ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-slate-300'}`;
+        if (ba) ba.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${!isCal ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-slate-300'}`;
+        if (isCal) loadSiteBizCalendar();
+    }
+
+    async function loadSiteBizCalendar() {
+        if (!selectedBusiness) return;
+        const titleEl = document.getElementById('site-cal-biz-title');
+        if (titleEl) titleEl.innerText = `${selectedBusiness.name} • Takvimden Randevu`;
+        const dateEl = document.getElementById('site-cal-date');
+        const todayStr = new Date().toISOString().slice(0, 10);
+        if (!siteCalSelectedDate || siteCalSelectedDate < todayStr) siteCalSelectedDate = todayStr;
+        if (dateEl) { dateEl.min = todayStr; dateEl.value = siteCalSelectedDate; }
+        try {
+            const r = await fetch(`${API_BASE}/api/public/business_calendar?business_id=${encodeURIComponent(selectedBusiness.id)}`);
+            if (r.ok) siteCalData = await r.json();
+        } catch (e) {}
+        renderSiteQuickDays();
+        renderSiteCalSlots();
+    }
+
+    function renderSiteQuickDays() {
+        const wrap = document.getElementById('site-cal-quick-days');
+        if (!wrap) return;
+        const dayNames = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+        const fullNames = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+        const btns = [];
+        for (let i = 0; i < 6; i++) {
+            const dt = new Date(); dt.setDate(dt.getDate() + i);
+            const iso = dt.toISOString().slice(0, 10);
+            const isClosed = (siteCalData.closed_days || []).includes(fullNames[dt.getDay()]) || (siteCalData.holiday_dates || []).includes(iso);
+            const isSel = (iso === siteCalSelectedDate);
+            const cls = isClosed
+                ? 'bg-slate-500/25 text-slate-400 border-slate-500/40'
+                : (isSel ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-indigo-400');
+            btns.push(`<button type="button" onclick="onSiteCalDateChange('${iso}')" class="px-2.5 py-1.5 rounded-xl border text-[11px] font-bold transition ${cls}">${dt.getDate()}.${dt.getMonth()+1} ${dayNames[dt.getDay()]}</button>`);
+        }
+        wrap.innerHTML = btns.join('');
+    }
+
+    function onSiteCalDateChange(val) {
+        if (!val) return;
+        siteCalSelectedDate = val;
+        siteCalSelectedHour = '';
+        const dateEl = document.getElementById('site-cal-date');
+        if (dateEl) dateEl.value = val;
+        renderSiteQuickDays();
+        renderSiteCalSlots();
+    }
+
+    function renderSiteCalSlots() {
+        const grid = document.getElementById('site-cal-slots');
+        if (!grid) return;
+        const dt = new Date(siteCalSelectedDate + 'T12:00:00');
+        const fullNames = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+        const dayTr = fullNames[dt.getDay()];
+        const isClosed = (siteCalData.closed_days || []).includes(dayTr) || (siteCalData.holiday_dates || []).includes(siteCalSelectedDate);
+        if (isClosed) {
+            grid.innerHTML = `<div class="col-span-full p-6 rounded-2xl bg-slate-500/20 border border-slate-500/40 text-center text-xs font-bold text-slate-400"><i class="fa-solid fa-calendar-xmark mr-1.5"></i>${siteCalSelectedDate} (${dayTr}) — İşletme bu tarihte kapalı / tatildir.</div>`;
+            return;
+        }
+        const hours = [];
+        for (let h = 9; h <= 18; h++) {
+            hours.push(`${String(h).padStart(2,'0')}:00`);
+            hours.push(`${String(h).padStart(2,'0')}:30`);
+        }
+        hours.push('19:00');
+        const bookedSet = new Set((siteCalData.booked || []).filter(b => b.day === siteCalSelectedDate).map(b => b.hour));
+        (siteCalData.busy_slots || []).forEach(s => {
+            const p = s.split(' ');
+            if (p[0] === siteCalSelectedDate && p[1]) bookedSet.add(p[1]);
+        });
+        grid.innerHTML = hours.map(hr => {
+            const isBooked = bookedSet.has(hr);
+            const isSel = (siteCalSelectedHour === hr);
+            if (isBooked) {
+                return `<button type="button" disabled class="py-2.5 rounded-xl bg-rose-600/25 border border-rose-500/50 text-rose-400 text-xs font-bold cursor-not-allowed opacity-85">${hr} <span class="text-[10px]">Dolu</span></button>`;
+            }
+            const selStyle = isSel ? 'background:#16a34a; border:2px solid #86efac; color:#fff; transform:scale(1.03);' : 'background:#3a8165; border:1px solid #52997d; color:#fff;';
+            return `<button type="button" onclick="siteCalSelectedHour='${hr}'; renderSiteCalSlots();" style="${selStyle}" class="py-2.5 rounded-xl text-xs font-bold transition shadow-sm">${hr}</button>`;
+        }).join('');
+    }
+
+    async function bookSiteCalendarAppt() {
+        if (!currentUser) {
+            showToast('Randevu alabilmek için lütfen kayıt olup giriş yapın.', 'info');
+            openModal('login-modal');
+            return;
+        }
+        if (!selectedBusiness) return;
+        if (!siteCalSelectedHour) {
+            showToast('Lütfen takvimden yeşil (uygun) bir saat seçin.', 'error');
+            return;
+        }
+        const note = (document.getElementById('site-cal-note')?.value || '').trim();
+        try {
+            const res = await fetch(`${API_BASE}/api/public/book_appointment`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    business_id: selectedBusiness.id,
+                    day: siteCalSelectedDate,
+                    hour: siteCalSelectedHour,
+                    note,
+                    customer_name: `${currentUser.first_name||''} ${currentUser.last_name||''}`.trim(),
+                    customer_phone: currentUser.phone || '',
+                    customer_email: currentUser.email || ''
+                })
+            });
+            const d = await res.json();
+            if (!res.ok) { showToast(d.error || 'Randevu oluşturulamadı', 'error'); return; }
+            showToast(`${siteCalSelectedDate} ${siteCalSelectedHour} randevunuz oluşturuldu!`, 'success');
+            siteCalSelectedHour = '';
+            const nEl = document.getElementById('site-cal-note'); if (nEl) nEl.value = '';
+            loadSiteBizCalendar();
+        } catch (e) {
+            showToast('Sunucuya bağlanılamadı.', 'error');
+        }
     }
 
     function backToStep(step, fromPop = false) {
