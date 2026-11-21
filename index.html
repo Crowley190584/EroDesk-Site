@@ -700,11 +700,8 @@
             <h3 id="modal-package-title" class="text-xl font-bold">Lisans Paketi</h3>
             <div id="modal-package-price" class="text-2xl font-extrabold text-emerald-400 mt-1">0 ₺</div>
         </div>
-        <div class="space-y-2.5 text-xs bg-slate-100 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-            <div><span class="text-slate-400">Ad Soyad:</span> <b id="pay-holder">Erman Anasız</b></div>
-            <div><span class="text-slate-400">Banka:</span> <b id="pay-bank">QNB Finansbank</b></div>
-            <div><span class="text-slate-400">IBAN:</span> <b id="pay-iban" class="text-amber-400">TR33 0001 0000 0000 1234 5678 90</b></div>
-            <div><span class="text-slate-400">İletişim:</span> <b id="pay-contact">0552 377 8929</b></div>
+        <div class="text-xs text-center bg-slate-100 dark:bg-slate-900 px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <span class="text-slate-400">Destek &amp; İletişim:</span> <b id="pay-contact">0552 377 8929</b>
         </div>
         <p class="text-[11.5px] text-emerald-400/90 text-center font-medium"><i class="fa-solid fa-shield-halved mr-1"></i>Shopier 256-bit SSL &amp; 3D Secure Güvenli Ödeme altyapısı ile lisans anahtarınız ödeme sonrası anında e-postanıza iletilir.</p>
         <a id="pay-shopier-btn" href="#" onclick="return openShopierMiniPopup(event, this.href);" class="hidden w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs text-center shadow-lg transition items-center justify-center space-x-2">
@@ -1593,9 +1590,6 @@
         const sp = catalogData.sales_payment_info || {};
         document.getElementById('modal-package-title').innerText = period + ' Lisans Paketi';
         document.getElementById('modal-package-price').innerText = price;
-        document.getElementById('pay-holder').innerText = sp.account_holder || 'Erman Anasız';
-        document.getElementById('pay-bank').innerText = sp.bank_name || 'QNB Finansbank';
-        document.getElementById('pay-iban').innerText = sp.iban_number || 'TR33 0001 0000 0000 1234 5678 90';
         document.getElementById('pay-contact').innerText = sp.contact_info || '0552 377 8929';
         const linkMap = {
             '1 Ay': sp.shopier_link_1m || '',
