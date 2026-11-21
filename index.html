@@ -41,6 +41,19 @@
             box-shadow: 0 22px 42px -12px rgba(99, 102, 241, 0.35);
             border-color: #6366f1 !important;
         }
+        @keyframes heroBtnWiggle {
+            0% { transform: translateY(0) scale(1); }
+            35% { transform: translateY(-3px) rotate(-0.8deg) scale(1.035); }
+            70% { transform: translateY(-4px) rotate(0.6deg) scale(1.04); }
+            100% { transform: translateY(-3px) rotate(0deg) scale(1.03); }
+        }
+        .hero-btn {
+            transition: transform 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
+        }
+        .hero-btn:hover {
+            animation: heroBtnWiggle 0.38s ease forwards;
+            box-shadow: 0 16px 32px -8px rgba(99, 102, 241, 0.45);
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-[#0b0f19] dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
@@ -108,15 +121,15 @@
                         Diş klinikleri, kuaförler, berberler ve cilt bakım merkezlerinin müsait saatlerini anında görün; telefon trafiği olmadan yapay zeka asistanla hemen randevunuzu oluşturun.
                     </p>
                     <div class="flex flex-wrap gap-3 pt-2">
-                        <button onclick="switchTab('ai')" class="px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-xl shadow-indigo-600/30 transition flex items-center space-x-2">
+                        <button onclick="switchTab('ai')" class="hero-btn px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-xl shadow-indigo-600/30 flex items-center space-x-2">
                             <i class="fa-solid fa-calendar-check"></i>
                             <span>Hemen Randevu Al</span>
                         </button>
-                        <button onclick="switchTab('packages')" class="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/15 transition flex items-center space-x-2">
+                        <button onclick="switchTab('packages')" class="hero-btn px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/15 flex items-center space-x-2">
                             <i class="fa-solid fa-briefcase text-amber-400"></i>
                             <span>İşletmeler İçin</span>
                         </button>
-                        <button onclick="openModal('demo-lead-modal')" class="px-6 py-3.5 rounded-2xl bg-emerald-600/90 hover:bg-emerald-500 text-white font-semibold text-sm shadow-xl transition flex items-center space-x-2">
+                        <button onclick="openModal('demo-lead-modal')" class="hero-btn px-6 py-3.5 rounded-2xl bg-emerald-600/90 hover:bg-emerald-500 text-white font-semibold text-sm shadow-xl flex items-center space-x-2">
                             <i class="fa-solid fa-phone-volume"></i>
                             <span>Ücretsiz Demo İsteyin</span>
                         </button>
@@ -918,7 +931,7 @@
         const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
         document.getElementById('btn-inline-add-cat')?.classList.toggle('hidden', !isAdmin);
         grid.innerHTML = catalogData.categories.map(c => `
-            <div onclick="selectAiCategory('${c.id}')" class="relative cursor-pointer p-5 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 hover:border-indigo-500 transition flex items-center space-x-4">
+            <div onclick="selectAiCategory('${c.id}')" class="pkg-card relative cursor-pointer p-5 rounded-3xl bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 flex items-center space-x-4">
                 ${isAdmin ? `
                 <div class="absolute top-3 right-3 flex gap-1.5" onclick="event.stopPropagation()">
                     <button onclick="openCatModal('${c.id}', '${c.name.replace(/'/g, "\\'")}')" title="Düzenle" class="w-7 h-7 rounded-lg bg-sky-500/15 text-sky-400 hover:bg-sky-500 hover:text-white text-xs"><i class="fa-solid fa-pen"></i></button>
