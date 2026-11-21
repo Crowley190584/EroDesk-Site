@@ -2014,7 +2014,7 @@
         if (!biz) return;
         pendingDeepBizId = '';
         startCategoryFlow(biz.category_id);
-        setTimeout(() => selectAiBusiness(biz.id), 120);
+        setTimeout(() => openSiteModeChoice(biz.id), 120);
     }
 
     async function submitDemoLead(e) {
