@@ -298,13 +298,17 @@
 
         <!-- ADIM 3: CANLI AI CHAT -->
         <div id="ai-step-3" class="hidden space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <button onclick="backToStep(2)" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs font-bold transition inline-flex items-center gap-2 shadow-sm"><i class="fa-solid fa-arrow-left"></i><span>İşletmelere Dön</span></button>
-                <div class="flex items-center gap-2 bg-slate-200 dark:bg-slate-900 p-1 rounded-2xl border border-slate-300 dark:border-slate-800">
+            <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
+                <div class="justify-self-start">
+                    <button onclick="backToStep(2)" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs font-bold transition inline-flex items-center gap-2 shadow-sm"><i class="fa-solid fa-arrow-left"></i><span>İşletmelere Dön</span></button>
+                </div>
+                <div class="justify-self-center flex items-center gap-2 bg-slate-200 dark:bg-slate-900 p-1 rounded-2xl border border-slate-300 dark:border-slate-800">
                     <button type="button" id="mode-btn-calendar" onclick="switchBizMode('calendar')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white transition"><i class="fa-solid fa-calendar-days mr-1.5"></i>Takvimden Randevu</button>
                     <button type="button" id="mode-btn-ai" onclick="switchBizMode('ai')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-300 transition"><i class="fa-solid fa-robot mr-1.5"></i>AI Asistana Sor</button>
                 </div>
-                <button id="btn-reset-chat" onclick="resetChat()" class="hidden px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 text-xs font-bold transition inline-flex items-center gap-1.5"><i class="fa-solid fa-rotate-right"></i><span>Sohbeti Sıfırla</span></button>
+                <div class="justify-self-end">
+                    <button id="btn-reset-chat" onclick="resetChat()" class="invisible pointer-events-none px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 text-xs font-bold transition inline-flex items-center gap-1.5"><i class="fa-solid fa-rotate-right"></i><span>Sohbeti Sıfırla</span></button>
+                </div>
             </div>
 
             <div id="biz-calendar-panel" class="bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
@@ -337,7 +341,7 @@
                         </select>
                         <span id="site-cal-selected-label" class="text-xs font-bold text-indigo-400 ml-1"></span>
                     </div>
-                    <div id="site-cal-quick-days" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-1.5 max-h-48 overflow-y-auto pr-1"></div>
+                    <div id="site-cal-quick-days" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-1.5"></div>
                 </div>
 
                 <div id="site-cal-slots" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2"></div>
@@ -1161,7 +1165,11 @@
         const isCal = (mode === 'calendar');
         document.getElementById('biz-calendar-panel')?.classList.toggle('hidden', !isCal);
         document.getElementById('biz-ai-panel')?.classList.toggle('hidden', isCal);
-        document.getElementById('btn-reset-chat')?.classList.toggle('hidden', isCal);
+        const rstBtn = document.getElementById('btn-reset-chat');
+        if (rstBtn) {
+            rstBtn.classList.toggle('invisible', isCal);
+            rstBtn.classList.toggle('pointer-events-none', isCal);
+        }
         const bc = document.getElementById('mode-btn-calendar');
         const ba = document.getElementById('mode-btn-ai');
         if (bc) bc.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${isCal ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-slate-300'}`;
