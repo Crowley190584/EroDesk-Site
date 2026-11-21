@@ -397,15 +397,46 @@
 
 </main>
 
-<footer class="border-t border-slate-200 dark:border-slate-800/80 py-6 px-4 text-center text-xs text-slate-500 dark:text-slate-400 space-y-2">
-    <div class="flex flex-wrap items-center justify-center gap-4 font-semibold">
-        <button onclick="openLegalModal('kvkk')" class="hover:text-indigo-400 transition">KVKK Aydınlatma Metni</button>
-        <span>•</span>
-        <button onclick="openLegalModal('privacy')" class="hover:text-indigo-400 transition">Gizlilik Politikası</button>
-        <span>•</span>
-        <button onclick="openLegalModal('distance')" class="hover:text-indigo-400 transition">Mesafeli Satış Sözleşmesi</button>
+<footer class="border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-[#0b1220] pt-12 pb-8 px-4 mt-10">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-xs text-slate-600 dark:text-slate-400">
+        <div class="space-y-3">
+            <div class="flex items-center space-x-2">
+                <img src="erodesk_icon.png" alt="EroDesk" class="w-8 h-8 rounded-lg object-cover">
+                <span class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">EroDesk <span class="text-indigo-500">AI</span></span>
+            </div>
+            <p class="leading-relaxed">Diş klinikleri, güzellik merkezleri, kuaförler, berberler ve psikoloji klinikleri için yapay zekâ destekli 7/24 akıllı randevu, müşteri takibi ve kasa yönetimi platformu.</p>
+        </div>
+        <div class="space-y-2.5">
+            <h4 class="text-sm font-bold text-slate-900 dark:text-white">Hızlı Menü</h4>
+            <ul class="space-y-2">
+                <li><button type="button" onclick="switchTab('home'); window.scrollTo({top:0,behavior:'smooth'})" class="hover:text-indigo-500 transition">Ana Sayfa</button></li>
+                <li><button type="button" onclick="switchTab('home'); document.getElementById('categories-grid')?.scrollIntoView({behavior:'smooth'})" class="hover:text-indigo-500 transition">İşletme Bul</button></li>
+                <li><button type="button" onclick="switchTab('home'); document.getElementById('pricing-section')?.scrollIntoView({behavior:'smooth'})" class="hover:text-indigo-500 transition">Lisans Paketleri</button></li>
+                <li><button type="button" onclick="openModal('demo-lead-modal')" class="text-emerald-500 font-semibold hover:underline">Ücretsiz Demo Talep Et</button></li>
+            </ul>
+        </div>
+        <div class="space-y-2.5">
+            <h4 class="text-sm font-bold text-slate-900 dark:text-white">Yasal &amp; Güvenlik</h4>
+            <ul class="space-y-2">
+                <li><button type="button" onclick="openLegalModal('kvkk')" class="hover:text-indigo-500 transition">KVKK Aydınlatma Metni</button></li>
+                <li><button type="button" onclick="openLegalModal('privacy')" class="hover:text-indigo-500 transition">Gizlilik Politikası</button></li>
+                <li><button type="button" onclick="openLegalModal('distance')" class="hover:text-indigo-500 transition">Mesafeli Satış Sözleşmesi</button></li>
+            </ul>
+        </div>
+        <div class="space-y-2.5">
+            <h4 class="text-sm font-bold text-slate-900 dark:text-white">İletişim</h4>
+            <ul class="space-y-2">
+                <li><a href="tel:+905523778929" class="hover:text-indigo-500 transition flex items-center space-x-2"><i class="fa-solid fa-phone text-sky-400"></i><span>0552 377 8929</span></a></li>
+                <li><a href="https://wa.me/905523778929" target="_blank" rel="noopener" class="hover:text-emerald-500 transition flex items-center space-x-2"><i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i><span>WhatsApp Destek</span></a></li>
+                <li><a href="mailto:destek.erodesk@gmail.com" class="hover:text-indigo-500 transition flex items-center space-x-2"><i class="fa-solid fa-envelope text-indigo-400"></i><span>destek.erodesk@gmail.com</span></a></li>
+                <li class="flex items-center space-x-2"><i class="fa-solid fa-location-dot text-rose-400"></i><span>Manisa / Salihli, Türkiye</span></li>
+            </ul>
+        </div>
     </div>
-    <div class="text-[11px] opacity-75">© 2026 EroDesk — Akıllı İşletme &amp; Randevu Sistemi</div>
+    <div class="max-w-7xl mx-auto mt-8 pt-6 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
+        <span>© 2026 EroDesk AI — Akıllı İşletme &amp; Randevu Platformu</span>
+        <span>256-bit SSL &amp; Shopier Güvencesiyle</span>
+    </div>
 </footer>
 
 <div id="demo-lead-modal" class="hidden fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm items-center justify-center p-4">
