@@ -1717,11 +1717,31 @@
                         <div class="text-[11px] text-sky-400 font-semibold mt-0.5">${a.day || ''} • ${a.hour || ''}</div>
                         ${a.note ? `<div class="text-[10.5px] text-slate-400 truncate mt-0.5">${a.note}</div>` : ''}
                     </div>
-                    <button type="button" onclick="cancelMyAppointment('${a.business_id}', '${a.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold flex-shrink-0 transition">İptal Et</button>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        ${a.confirmed
+                            ? '<span class="px-2.5 py-1.5 rounded-xl bg-sky-500/20 border border-sky-500/40 text-sky-400 text-[11px] font-bold">✓ Teyitli</span>'
+                            : `<button type="button" onclick="confirmMyAppointment('${a.business_id}', '${a.id}')" class="px-2.5 py-1.5 rounded-xl text-white text-[11px] font-bold transition" style="background:#3a8165;">Geliyorum ✓</button>`}
+                        <button type="button" onclick="cancelMyAppointment('${a.business_id}', '${a.id}')" class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold transition">İptal Et</button>
+                    </div>
                 </div>
             `).join('');
         } catch (e) {
             listEl.innerHTML = '<div class="text-rose-400 text-center py-6">Randevular alınamadı.</div>';
+        }
+    }
+    async function confirmMyAppointment(bizId, apptId) {
+        if (!currentUser) return;
+        try {
+            const res = await fetch(`${API_BASE}/api/public/confirm_appointment`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: currentUser.phone || '', business_id: bizId, appointment_id: apptId })
+            });
+            const d = await res.json();
+            if (!res.ok) { showToast(d.error || 'Teyit edilemedi', 'error'); return; }
+            showToast('Randevunuza geleceğiniz teyit edildi!', 'success');
+            openMyAppointmentsView();
+        } catch (e) {
+            showToast('Sunucuya bağlanılamadı.', 'error');
         }
     }
     async function cancelMyAppointment(bizId, apptId) {
