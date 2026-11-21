@@ -320,9 +320,24 @@
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2">
-                    <input type="date" id="site-cal-date" onchange="onSiteCalDateChange(this.value)" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold outline-none">
-                    <div id="site-cal-quick-days" class="flex flex-wrap gap-1.5"></div>
+                <div class="space-y-2.5">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="site-cal-year" onchange="onSiteCalMonthYearChange()" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030">2030</option>
+                        </select>
+                        <select id="site-cal-month" onchange="onSiteCalMonthYearChange()" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+                            <option value="0">Ocak</option><option value="1">Şubat</option><option value="2">Mart</option>
+                            <option value="3">Nisan</option><option value="4">Mayıs</option><option value="5">Haziran</option>
+                            <option value="6">Temmuz</option><option value="7">Ağustos</option><option value="8">Eylül</option>
+                            <option value="9">Ekim</option><option value="10">Kasım</option><option value="11">Aralık</option>
+                        </select>
+                        <span id="site-cal-selected-label" class="text-xs font-bold text-indigo-400 ml-1"></span>
+                    </div>
+                    <div id="site-cal-quick-days" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-1.5 max-h-48 overflow-y-auto pr-1"></div>
                 </div>
 
                 <div id="site-cal-slots" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2"></div>
@@ -1170,31 +1185,67 @@
         renderSiteCalSlots();
     }
 
+    const SITE_MONTHS_TR = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+    const SITE_DAYS_TR = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+    let siteCalYear = new Date().getFullYear();
+    let siteCalMonth = new Date().getMonth();
+
+    function syncSiteCalSelectors() {
+        const yEl = document.getElementById('site-cal-year');
+        const mEl = document.getElementById('site-cal-month');
+        if (yEl) yEl.value = String(Math.min(2030, Math.max(2026, siteCalYear)));
+        if (mEl) mEl.value = String(siteCalMonth);
+    }
+
+    function onSiteCalMonthYearChange() {
+        const yEl = document.getElementById('site-cal-year');
+        const mEl = document.getElementById('site-cal-month');
+        siteCalYear = parseInt(yEl?.value || '2026', 10);
+        siteCalMonth = parseInt(mEl?.value || '0', 10);
+        const now = new Date();
+        const daysInMonth = new Date(siteCalYear, siteCalMonth + 1, 0).getDate();
+        const targetDay = (now.getFullYear() === siteCalYear && now.getMonth() === siteCalMonth) ? Math.min(now.getDate(), daysInMonth) : 1;
+        siteCalSelectedDate = `${siteCalYear}-${String(siteCalMonth + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
+        siteCalSelectedHour = '';
+        renderSiteQuickDays();
+        renderSiteCalSlots();
+    }
+
     function renderSiteQuickDays() {
+        syncSiteCalSelectors();
         const wrap = document.getElementById('site-cal-quick-days');
         if (!wrap) return;
-        const dayNames = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
-        const fullNames = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+        const daysInMonth = new Date(siteCalYear, siteCalMonth + 1, 0).getDate();
+        const mName = SITE_MONTHS_TR[siteCalMonth];
         const btns = [];
-        for (let i = 0; i < 6; i++) {
-            const dt = new Date(); dt.setDate(dt.getDate() + i);
-            const iso = dt.toISOString().slice(0, 10);
-            const isClosed = (siteCalData.closed_days || []).includes(fullNames[dt.getDay()]) || (siteCalData.holiday_dates || []).includes(iso);
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dt = new Date(siteCalYear, siteCalMonth, d, 12, 0, 0);
+            const iso = `${siteCalYear}-${String(siteCalMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const dayFull = SITE_DAYS_TR[dt.getDay()];
+            const isClosed = (siteCalData.closed_days || []).includes(dayFull) || (siteCalData.holiday_dates || []).includes(iso);
             const isSel = (iso === siteCalSelectedDate);
             const cls = isClosed
-                ? 'bg-slate-500/25 text-slate-400 border-slate-500/40'
+                ? (isSel ? 'bg-slate-600 text-white border-slate-400 ring-2 ring-slate-400' : 'bg-slate-500/25 text-slate-400 border-slate-500/40')
                 : (isSel ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-indigo-400');
-            btns.push(`<button type="button" onclick="onSiteCalDateChange('${iso}')" class="px-2.5 py-1.5 rounded-xl border text-[11px] font-bold transition ${cls}">${dt.getDate()}.${dt.getMonth()+1} ${dayNames[dt.getDay()]}</button>`);
+            btns.push(`<button type="button" onclick="onSiteCalDateChange('${iso}')" class="px-2.5 py-2 rounded-xl border text-[11px] font-bold transition text-left truncate ${cls}">${d} ${mName} ${dayFull}</button>`);
         }
         wrap.innerHTML = btns.join('');
+        const lblEl = document.getElementById('site-cal-selected-label');
+        if (lblEl && siteCalSelectedDate) {
+            const sdt = new Date(siteCalSelectedDate + 'T12:00:00');
+            lblEl.innerText = `${sdt.getDate()} ${SITE_MONTHS_TR[sdt.getMonth()]} ${SITE_DAYS_TR[sdt.getDay()]}`;
+        }
     }
 
     function onSiteCalDateChange(val) {
         if (!val) return;
         siteCalSelectedDate = val;
+        const p = val.split('-');
+        if (p.length === 3) {
+            siteCalYear = parseInt(p[0], 10);
+            siteCalMonth = parseInt(p[1], 10) - 1;
+        }
         siteCalSelectedHour = '';
-        const dateEl = document.getElementById('site-cal-date');
-        if (dateEl) dateEl.value = val;
         renderSiteQuickDays();
         renderSiteCalSlots();
     }
