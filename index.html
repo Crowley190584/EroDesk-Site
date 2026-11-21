@@ -578,7 +578,13 @@
 
         <div id="profile-main-view" class="space-y-4">
             <div class="text-center">
-                <div id="profile-avatar-big" class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-white flex items-center justify-center text-2xl font-bold mx-auto mb-3 overflow-hidden">U</div>
+                <div onclick="document.getElementById('acct-avatar-input').click()" title="Profil resmini değiştir" class="group relative w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden cursor-pointer shadow-lg">
+                    <div id="profile-avatar-big" class="w-full h-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-white flex items-center justify-center text-2xl font-bold">U</div>
+                    <div class="absolute inset-0 bg-slate-500/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-pen text-white text-sm"></i>
+                    </div>
+                </div>
+                <input type="file" id="acct-avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
                 <h3 id="profile-full-name" class="text-lg font-bold">Kullanıcı</h3>
                 <p id="profile-email-text" class="text-xs text-slate-400"></p>
                 <span id="profile-role-badge" class="inline-block mt-2 px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-400">Üye</span>
@@ -616,20 +622,6 @@
                 <h3 class="text-base font-bold">Hesabım</h3>
             </div>
 
-            <div class="flex items-center space-x-4 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <div id="acct-avatar-preview" class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-white flex items-center justify-center text-xl font-bold overflow-hidden flex-shrink-0">U</div>
-                <div class="flex-1 space-y-1.5">
-                    <div class="text-xs font-semibold">Profil Resmi</div>
-                    <div class="flex items-center gap-2">
-                        <label class="cursor-pointer px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold transition">
-                            <span>Fotoğraf Seç</span>
-                            <input type="file" id="acct-avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
-                        </label>
-                        <button type="button" onclick="clearAvatarSelection()" class="px-2.5 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-[11px] font-semibold text-slate-500 hover:text-rose-500 transition">Kaldır</button>
-                    </div>
-                </div>
-            </div>
-
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">Ad</label>
@@ -648,9 +640,6 @@
                 <label class="block text-xs font-medium text-slate-400 mb-1">E-posta</label>
                 <input type="email" id="acct-email" readonly class="w-full bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 cursor-not-allowed outline-none">
             </div>
-            <button onclick="saveAccountProfile()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition">
-                <i class="fa-solid fa-check mr-1.5"></i>Profil Resmini Kaydet
-            </button>
         </div>
     </div>
 </div>
@@ -1372,13 +1361,14 @@
                 const sy = (img.height - minSide) / 2;
                 ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, 140, 140);
                 pendingAvatarUrl = canvas.toDataURL('image/jpeg', 0.82);
-                _renderAcctAvatarPreview();
+                saveAccountProfile(true);
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
+        ev.target.value = '';
     }
-    async function saveAccountProfile() {
+    async function saveAccountProfile(stayOnMain = false) {
         if (!currentUser) return;
         try {
             const res = await fetch(`${API_BASE}/api/public/auth/update_profile`, {
@@ -1393,7 +1383,7 @@
         }
         localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
         updateAuthUI();
-        closeAccountSettingsView();
+        if (!stayOnMain) closeAccountSettingsView();
         showToast('Profil resminiz güncellendi!', 'success');
     }
 
