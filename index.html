@@ -1807,6 +1807,23 @@
         c.appendChild(t);
         setTimeout(() => t.remove(), 3500);
     }
+
+    (function trackSiteVisitOnce() {
+        try {
+            if (!sessionStorage.getItem('erodesk_visited')) {
+                sessionStorage.setItem('erodesk_visited', '1');
+                fetch(`${API_BASE}/api/public/track_visit`, { method: 'POST' }).catch(() => {});
+            }
+        } catch (e) {}
+    })();
+    function trackFileDownload(file) {
+        try {
+            fetch(`${API_BASE}/api/public/track_download`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ file })
+            }).catch(() => {});
+        } catch (e) {}
+    }
 </script>
 </body>
 </html>
