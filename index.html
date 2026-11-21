@@ -642,6 +642,14 @@
                 <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
             </button>
 
+            <button onclick="openMyAppointmentsView()" class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500 flex items-center justify-between transition">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-calendar-check text-sky-400"></i>
+                    <span class="text-xs font-semibold">Randevularım</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </button>
+
             <div class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <i class="fa-solid fa-moon text-indigo-400"></i>
@@ -707,6 +715,18 @@
             <button type="button" onclick="saveAccountProfile(false)" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition">
                 <i class="fa-solid fa-check mr-1.5"></i>Kaydet
             </button>
+        </div>
+
+        <div id="profile-appointments-view" class="hidden space-y-4">
+            <div class="flex items-center space-x-2">
+                <button onclick="closeMyAppointmentsView()" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i>Geri
+                </button>
+                <h3 class="text-base font-bold">Randevularım</h3>
+            </div>
+            <div id="my-appointments-list" class="space-y-2.5 max-h-80 overflow-y-auto pr-1 text-xs">
+                <div class="text-slate-400 text-center py-6">Yükleniyor...</div>
+            </div>
         </div>
     </div>
 </div>
@@ -1401,6 +1421,54 @@
     function closeAccountSettingsView() {
         document.getElementById('profile-account-view').classList.add('hidden');
         document.getElementById('profile-main-view').classList.remove('hidden');
+    }
+    function closeMyAppointmentsView() {
+        document.getElementById('profile-appointments-view').classList.add('hidden');
+        document.getElementById('profile-main-view').classList.remove('hidden');
+    }
+    async function openMyAppointmentsView() {
+        if (!currentUser) return;
+        document.getElementById('profile-main-view').classList.add('hidden');
+        document.getElementById('profile-account-view').classList.add('hidden');
+        document.getElementById('profile-appointments-view').classList.remove('hidden');
+        const listEl = document.getElementById('my-appointments-list');
+        listEl.innerHTML = '<div class="text-slate-400 text-center py-6">Randevularınız yükleniyor...</div>';
+        try {
+            const res = await fetch(`${API_BASE}/api/public/my_appointments?phone=${encodeURIComponent(currentUser.phone || '')}`);
+            const d = await res.json();
+            const appts = d.appointments || [];
+            if (!appts.length) {
+                listEl.innerHTML = '<div class="text-slate-400 text-center py-6 bg-slate-100 dark:bg-slate-900 rounded-2xl">Henüz kayıtlı randevunuz bulunmuyor.</div>';
+                return;
+            }
+            listEl.innerHTML = appts.map(a => `
+                <div class="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <div class="font-bold text-xs truncate">${a.business_name || a.business_id}</div>
+                        <div class="text-[11px] text-sky-400 font-semibold mt-0.5">${a.day || ''} • ${a.hour || ''}</div>
+                        ${a.note ? `<div class="text-[10.5px] text-slate-400 truncate mt-0.5">${a.note}</div>` : ''}
+                    </div>
+                    <button type="button" onclick="cancelMyAppointment('${a.business_id}', '${a.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold flex-shrink-0 transition">İptal Et</button>
+                </div>
+            `).join('');
+        } catch (e) {
+            listEl.innerHTML = '<div class="text-rose-400 text-center py-6">Randevular alınamadı.</div>';
+        }
+    }
+    async function cancelMyAppointment(bizId, apptId) {
+        if (!currentUser || !confirm('Bu randevuyu iptal etmek istediğinize emin misiniz?')) return;
+        try {
+            const res = await fetch(`${API_BASE}/api/public/cancel_appointment`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: currentUser.phone || '', business_id: bizId, appointment_id: apptId })
+            });
+            const d = await res.json();
+            if (!res.ok) { showToast(d.error || 'İptal edilemedi', 'error'); return; }
+            showToast('Randevunuz iptal edildi.', 'success');
+            openMyAppointmentsView();
+        } catch (e) {
+            showToast('Sunucuya bağlanılamadı.', 'error');
+        }
     }
     function _renderAcctAvatarPreview() {
         const el = document.getElementById('acct-avatar-preview');
