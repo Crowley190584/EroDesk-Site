@@ -687,36 +687,23 @@
                     <input type="text" id="acct-last" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-500">
                 </div>
             </div>
-            <div class="space-y-2">
-                <label class="block text-xs font-medium text-slate-400">Telefon Numarası</label>
-                <div class="flex gap-2">
-                    <input type="tel" id="acct-phone" placeholder="05XX XXX XX XX" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-500">
-                    <button type="button" onclick="requestContactChange('phone')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex-shrink-0">Güncelle</button>
-                </div>
-                <div id="acct-phone-verify-box" class="hidden p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 space-y-2">
-                    <div id="acct-phone-code-info" class="text-[11px] text-indigo-300"></div>
-                    <div class="flex gap-2">
-                        <input type="text" id="acct-phone-code" maxlength="6" placeholder="6 Haneli Kod" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 text-center text-xs font-bold tracking-widest outline-none">
-                        <button type="button" onclick="confirmContactChange('phone')" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition">Onayla</button>
-                    </div>
-                </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Telefon Numarası</label>
+                <input type="tel" id="acct-phone" placeholder="05XX XXX XX XX" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-500">
             </div>
-            <div class="space-y-2">
-                <label class="block text-xs font-medium text-slate-400">E-posta</label>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">E-posta</label>
+                <input type="email" id="acct-email" placeholder="ornek@mail.com" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-500">
+            </div>
+            <div id="acct-unified-verify-box" class="hidden p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 space-y-2.5">
+                <div id="acct-unified-code-info" class="text-[11px] text-indigo-300"></div>
                 <div class="flex gap-2">
-                    <input type="email" id="acct-email" placeholder="ornek@mail.com" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-500">
-                    <button type="button" onclick="requestContactChange('email')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex-shrink-0">Güncelle</button>
-                </div>
-                <div id="acct-email-verify-box" class="hidden p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 space-y-2">
-                    <div id="acct-email-code-info" class="text-[11px] text-indigo-300"></div>
-                    <div class="flex gap-2">
-                        <input type="text" id="acct-email-code" maxlength="6" placeholder="6 Haneli Kod" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 text-center text-xs font-bold tracking-widest outline-none">
-                        <button type="button" onclick="confirmContactChange('email')" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition">Onayla</button>
-                    </div>
+                    <input type="text" id="acct-unified-code" maxlength="6" placeholder="6 Haneli Kod" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-center text-xs font-bold tracking-widest outline-none">
+                    <button type="button" onclick="confirmUnifiedProfileSave()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition">Onayla ve Kaydet</button>
                 </div>
             </div>
             <button type="button" onclick="saveAccountProfile(false)" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition">
-                <i class="fa-solid fa-check mr-1.5"></i>Kaydet
+                <i class="fa-solid fa-check mr-1.5"></i>Değişiklikleri Kaydet
             </button>
         </div>
 
@@ -1413,10 +1400,8 @@
         document.getElementById('acct-last').value = currentUser.last_name || '';
         document.getElementById('acct-phone').value = currentUser.phone || '';
         document.getElementById('acct-email').value = currentUser.email || '';
-        document.getElementById('acct-phone-verify-box')?.classList.add('hidden');
-        document.getElementById('acct-email-verify-box')?.classList.add('hidden');
-        const pc = document.getElementById('acct-phone-code'); if (pc) pc.value = '';
-        const ec = document.getElementById('acct-email-code'); if (ec) ec.value = '';
+        document.getElementById('acct-unified-verify-box')?.classList.add('hidden');
+        const uc = document.getElementById('acct-unified-code'); if (uc) uc.value = '';
         _renderAcctAvatarPreview();
         document.getElementById('profile-main-view').classList.add('hidden');
         document.getElementById('profile-account-view').classList.remove('hidden');
@@ -1538,86 +1523,79 @@
 
     async function saveAccountProfile(avatarOnly = false) {
         if (!currentUser) return;
-        const payload = { email: currentUser.email };
         if (avatarOnly) {
-            payload.avatar_url = pendingAvatarUrl || '';
-        } else {
-            const fn = document.getElementById('acct-first').value.trim().replace(/\s+/g, ' ');
-            const ln = document.getElementById('acct-last').value.trim();
-            if (!_isValidRealFirstNameJS(fn)) {
-                showToast('Lütfen geçerli bir gerçek Ad girin (rakam, anlamsız harfler veya isim dışı kelimeler kullanılamaz).', 'error');
-                return;
+            try {
+                const res = await fetch(`${API_BASE}/api/public/auth/update_profile`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentUser.email, avatar_url: pendingAvatarUrl || '' })
+                });
+                const d = await res.json();
+                if (!res.ok) { showToast(d.error || 'Güncelleme hatası', 'error'); return; }
+                currentUser = d.user;
+            } catch (e) {
+                currentUser = { ...currentUser, avatar_url: pendingAvatarUrl || '' };
             }
-            if (!ln) {
-                showToast('Soyad alanı boş bırakılamaz.', 'error');
-                return;
-            }
-            payload.first_name = fn;
-            payload.last_name = ln;
+            localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
+            updateAuthUI();
+            showToast('Profil resminiz güncellendi!', 'success');
+            return;
         }
+
+        const fn = document.getElementById('acct-first').value.trim().replace(/\s+/g, ' ');
+        const ln = document.getElementById('acct-last').value.trim();
+        const ph = document.getElementById('acct-phone').value.trim();
+        const em = document.getElementById('acct-email').value.trim().toLowerCase();
+        if (!_isValidRealFirstNameJS(fn)) {
+            showToast('Lütfen geçerli bir gerçek Ad girin (rakam, anlamsız harfler veya isim dışı kelimeler kullanılamaz).', 'error');
+            return;
+        }
+        if (!ln) { showToast('Soyad alanı boş bırakılamaz.', 'error'); return; }
+        if (!ph || !em) { showToast('Telefon ve e-posta alanları boş bırakılamaz.', 'error'); return; }
+
         try {
-            const res = await fetch(`${API_BASE}/api/public/auth/update_profile`, {
+            const res = await fetch(`${API_BASE}/api/public/auth/profile_save_request`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ email: currentUser.email, first_name: fn, last_name: ln, new_phone: ph, new_email: em })
             });
             const d = await res.json();
             if (!res.ok) { showToast(d.error || 'Güncelleme hatası', 'error'); return; }
-            currentUser = d.user;
-        } catch (e) {
-            if (avatarOnly) currentUser = { ...currentUser, avatar_url: pendingAvatarUrl || '' };
-            else currentUser = { ...currentUser, first_name: payload.first_name, last_name: payload.last_name };
-        }
-        localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
-        updateAuthUI();
-        if (!avatarOnly) closeAccountSettingsView();
-        showToast(avatarOnly ? 'Profil resminiz güncellendi!' : 'Hesap bilgileriniz kaydedildi!', 'success');
-    }
-
-    async function requestContactChange(type) {
-        if (!currentUser) return;
-        const inputEl = document.getElementById(type === 'phone' ? 'acct-phone' : 'acct-email');
-        const val = (inputEl?.value || '').trim();
-        if (!val) { showToast('Lütfen yeni değeri girin.', 'error'); return; }
-        try {
-            const res = await fetch(`${API_BASE}/api/public/auth/contact_change_send_code`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: currentUser.email, change_type: type, new_value: val })
-            });
-            const d = await res.json();
-            if (!res.ok) { showToast(d.error || 'Kod gönderilemedi', 'error'); return; }
-            const box = document.getElementById(`acct-${type}-verify-box`);
-            const info = document.getElementById(`acct-${type}-code-info`);
-            if (info) {
-                info.innerHTML = d.email_sent
-                    ? `<b>${d.target_email}</b> adresine 6 haneli doğrulama kodu gönderildi.`
-                    : `Doğrulama kodunuz: <b class="text-amber-400">${d.dev_code}</b>`;
+            if (d.status === 'code_sent') {
+                const info = document.getElementById('acct-unified-code-info');
+                if (info) {
+                    info.innerHTML = d.email_sent
+                        ? `<b>${d.target_email}</b> adresine tek seferlik 6 haneli doğrulama kodu gönderildi.`
+                        : `Doğrulama kodunuz: <b class="text-amber-400">${d.dev_code}</b>`;
+                }
+                document.getElementById('acct-unified-verify-box')?.classList.remove('hidden');
+                showToast('Doğrulama kodu e-postanıza gönderildi.', 'info');
+                return;
             }
-            box?.classList.remove('hidden');
-            showToast('Doğrulama kodu gönderildi.', 'info');
+            currentUser = d.user;
+            localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
+            updateAuthUI();
+            closeAccountSettingsView();
+            showToast('Değişiklikler kaydedildi!', 'success');
         } catch (e) {
             showToast('Sunucuya bağlanılamadı.', 'error');
         }
     }
 
-    async function confirmContactChange(type) {
+    async function confirmUnifiedProfileSave() {
         if (!currentUser) return;
-        const code = (document.getElementById(`acct-${type}-code`)?.value || '').trim();
+        const code = (document.getElementById('acct-unified-code')?.value || '').trim();
         if (code.length < 6) { showToast('Lütfen 6 haneli kodu girin.', 'error'); return; }
         try {
-            const res = await fetch(`${API_BASE}/api/public/auth/contact_change_verify`, {
+            const res = await fetch(`${API_BASE}/api/public/auth/profile_save_verify`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: currentUser.email, change_type: type, code })
+                body: JSON.stringify({ email: currentUser.email, code })
             });
             const d = await res.json();
             if (!res.ok) { showToast(d.error || 'Kod hatalı', 'error'); return; }
             currentUser = d.user;
             localStorage.setItem('erodesk_current_user', JSON.stringify(currentUser));
             updateAuthUI();
-            document.getElementById('acct-phone').value = currentUser.phone || '';
-            document.getElementById('acct-email').value = currentUser.email || '';
-            document.getElementById(`acct-${type}-verify-box`)?.classList.add('hidden');
-            document.getElementById(`acct-${type}-code`).value = '';
-            showToast(type === 'phone' ? 'Telefon numaranız güncellendi!' : 'E-posta adresiniz güncellendi!', 'success');
+            closeAccountSettingsView();
+            showToast('Tüm değişiklikleriniz kaydedildi!', 'success');
         } catch (e) {
             showToast('Sunucuya bağlanılamadı.', 'error');
         }
