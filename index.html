@@ -1735,13 +1735,13 @@
         return false;
     }
 
-    let pendingDeepBizId = new URLSearchParams(window.location.search).get('biz') || '';
+    let pendingDeepBizId = new URLSearchParams(window.location.search).get('id') || new URLSearchParams(window.location.search).get('biz') || '';
     (function tryOpenMobileAppForBiz() {
         if (!pendingDeepBizId) return;
         const p = new URLSearchParams(window.location.search);
         if (p.get('nofb') === '1') return;
         if (/Android/i.test(navigator.userAgent || '')) {
-            const fb = encodeURIComponent(`https://www.erodesk.com.tr/?biz=${pendingDeepBizId}&nofb=1`);
+            const fb = encodeURIComponent(`https://www.erodesk.com.tr/?id=${pendingDeepBizId}&nofb=1`);
             window.location.href = `intent://biz/${encodeURIComponent(pendingDeepBizId)}#Intent;scheme=erodesk;package=com.erodesk.customer;S.browser_fallback_url=${fb};end`;
         }
     })();
