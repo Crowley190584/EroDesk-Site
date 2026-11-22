@@ -329,6 +329,7 @@
                 </div>
 
                 <div id="site-cal-slots" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2"></div>
+                <div id="site-cal-services" class="hidden flex flex-wrap gap-1.5 pt-1"></div>
 
                 <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-2.5">
                     <input id="site-cal-note" type="text" placeholder="Yaptıracağınız işlem veya not (Örn: Dolgu, Saç kesimi, Cilt bakımı...)" class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl px-4 py-2.5 text-xs outline-none focus:border-indigo-500">
@@ -1270,12 +1271,26 @@
             grid.innerHTML = `<div class="col-span-full p-6 rounded-2xl bg-slate-500/20 border border-slate-500/40 text-center text-xs font-bold text-slate-400"><i class="fa-solid fa-calendar-xmark mr-1.5"></i>${siteCalSelectedDate} (${dayTr}) — İşletme bu tarihte kapalı / tatildir.</div>`;
             return;
         }
-        const hours = [];
-        for (let h = 9; h < 18; h++) {
-            hours.push(`${String(h).padStart(2,'0')}:00`);
-            hours.push(`${String(h).padStart(2,'0')}:30`);
+        const customHrs = Array.isArray(siteCalData.custom_hours) ? siteCalData.custom_hours.filter(Boolean) : [];
+        const hours = customHrs.length ? customHrs : [];
+        if (!hours.length) {
+            for (let h = 9; h < 18; h++) {
+                hours.push(`${String(h).padStart(2,'0')}:00`);
+                hours.push(`${String(h).padStart(2,'0')}:30`);
+            }
+            hours.push('18:00');
         }
-        hours.push('18:00');
+        const srvWrap = document.getElementById('site-cal-services');
+        const customSrvs = Array.isArray(siteCalData.custom_services) ? siteCalData.custom_services.filter(Boolean) : [];
+        if (srvWrap) {
+            if (customSrvs.length) {
+                srvWrap.classList.remove('hidden');
+                srvWrap.innerHTML = `<span class="text-[11px] text-slate-400 font-semibold self-center mr-1">Hizmet Seçin:</span>` + customSrvs.map(s => `<button type="button" onclick="pickSiteServiceChip(this.dataset.srv)" data-srv="${escapeHtml(s)}" class="px-2.5 py-1 rounded-xl bg-indigo-500/15 hover:bg-indigo-600 hover:text-white border border-indigo-500/35 text-indigo-300 text-[11px] font-bold transition">${escapeHtml(s)}</button>`).join('');
+            } else {
+                srvWrap.classList.add('hidden');
+                srvWrap.innerHTML = '';
+            }
+        }
         const bookedSet = new Set((siteCalData.booked || []).filter(b => b.day === siteCalSelectedDate).map(b => b.hour));
         (siteCalData.busy_slots || []).forEach(s => {
             const p = s.split(' ');
@@ -1290,6 +1305,14 @@
             const selStyle = isSel ? 'background:#16a34a; border:2px solid #86efac; color:#fff; transform:scale(1.03);' : 'background:#3a8165; border:1px solid #52997d; color:#fff;';
             return `<button type="button" onclick="siteCalSelectedHour='${hr}'; renderSiteCalSlots();" style="${selStyle}" class="py-2.5 rounded-xl text-xs font-bold transition shadow-sm">${hr}</button>`;
         }).join('');
+    }
+
+    function pickSiteServiceChip(srv) {
+        const el = document.getElementById('site-cal-note');
+        if (!el) return;
+        const cur = el.value.trim();
+        if (!cur) el.value = srv;
+        else if (!cur.includes(srv)) el.value = cur + ', ' + srv;
     }
 
     async function bookSiteCalendarAppt() {
