@@ -1222,6 +1222,12 @@
         const todayIso = new Date().toISOString().slice(0, 10);
         const daysInMonth = new Date(siteCalYear, siteCalMonth + 1, 0).getDate();
         const mName = SITE_MONTHS_TR[siteCalMonth];
+        const customHrs = Array.isArray(siteCalData.custom_hours) ? siteCalData.custom_hours.filter(Boolean) : [];
+        let dayHrs = customHrs.length ? customHrs : [];
+        if (!dayHrs.length) {
+            for (let h = 9; h < 18; h++) { dayHrs.push(`${String(h).padStart(2,'0')}:00`); dayHrs.push(`${String(h).padStart(2,'0')}:30`); }
+            dayHrs.push('18:00');
+        }
         const btns = [];
         for (let d = 1; d <= daysInMonth; d++) {
             const dt = new Date(siteCalYear, siteCalMonth, d, 12, 0, 0);
@@ -1230,13 +1236,18 @@
             const isPast = iso < todayIso;
             const isClosed = (siteCalData.closed_days || []).includes(dayFull) || (siteCalData.holiday_dates || []).includes(iso);
             const isSel = (iso === siteCalSelectedDate);
+            const dayBooked = new Set((siteCalData.booked || []).filter(b => b.day === iso).map(b => b.hour));
+            (siteCalData.busy_slots || []).forEach(s => { const p = s.split(' '); if (p[0] === iso && p[1]) dayBooked.add(p[1]); });
+            const isFull = !isClosed && dayHrs.length > 0 && dayHrs.every(hr => dayBooked.has(hr));
             if (isPast) {
                 btns.push(`<button type="button" disabled class="px-2.5 py-2 rounded-xl border text-[11px] font-bold text-left truncate bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed opacity-50">${d} ${mName} ${dayFull}</button>`);
             } else {
                 const cls = isClosed
                     ? (isSel ? 'bg-slate-600 text-white border-slate-400 ring-2 ring-slate-400' : 'bg-slate-500/25 text-slate-400 border-slate-500/40')
-                    : (isSel ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-indigo-400');
-                btns.push(`<button type="button" onclick="onSiteCalDateChange('${iso}')" class="px-2.5 py-2 rounded-xl border text-[11px] font-bold transition text-left truncate ${cls}">${d} ${mName} ${dayFull}</button>`);
+                    : (isFull
+                        ? (isSel ? 'bg-rose-600 text-white border-rose-400 ring-2 ring-rose-400' : 'bg-rose-600/20 text-rose-400 border-rose-500/40')
+                        : (isSel ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-indigo-400'));
+                btns.push(`<button type="button" onclick="onSiteCalDateChange('${iso}')" class="px-2.5 py-2 rounded-xl border text-[11px] font-bold transition text-left truncate ${cls}">${d} ${mName} ${dayFull}${isFull ? ' (Dolu)' : ''}</button>`);
             }
         }
         wrap.innerHTML = btns.join('');
