@@ -914,7 +914,7 @@
 
     async function syncCatalogFromAdminDesk() {
         try {
-            const res = await fetch(`${API_BASE}/api/public/catalog`);
+            const res = await fetch(`${API_BASE}/api/public/catalog?viewer_email=${encodeURIComponent(currentUser?.email || '')}`);
             if (!res.ok) throw new Error();
             const d = await res.json();
             if (d.categories && d.categories.length) {
