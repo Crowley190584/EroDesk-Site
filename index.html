@@ -80,6 +80,9 @@
             <button id="tab-btn-packages" onclick="switchTab('packages')" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
                 <i class="fa-solid fa-briefcase mr-1.5"></i>İşletmeler İçin
             </button>
+            <button type="button" onclick="openDownloadsModal()" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition">
+                <i class="fa-solid fa-download mr-1.5"></i>İndir
+            </button>
         </nav>
 
         <div class="flex items-center space-x-3">
@@ -728,6 +731,14 @@
                     <div class="w-11 h-6 bg-slate-400 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                 </label>
             </div>
+
+            <button type="button" onclick="closeModal('profile-modal'); openDownloadsModal();" class="w-full p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 flex items-center justify-between transition">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-download text-emerald-400"></i>
+                    <span class="text-xs font-bold text-emerald-400">Uygulamaları İndir</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-emerald-400"></i>
+            </button>
 
             <button onclick="logoutUser()" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition">
                 <i class="fa-solid fa-right-from-bracket mr-1.5"></i>Çıkış Yap
@@ -2167,6 +2178,90 @@
             }).catch(() => {});
         } catch (e) {}
     }
+
+    function openDownloadsModal() {
+        renderDownloadsModal();
+        openModal('downloads-modal');
+    }
+
+    function renderDownloadsModal() {
+        const body = document.getElementById('downloads-modal-body');
+        const sub = document.getElementById('downloads-modal-sub');
+        if (!body) return;
+        if (!currentUser) {
+            if (sub) sub.textContent = 'Uygulama indirme alanına erişmek için giriş yapın.';
+            body.innerHTML = `
+                <div class="p-5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div class="text-sm font-bold">Giriş Yapmanız Gerekiyor</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Hesap türünüze (Müşteri veya İşletme) özel indirme dosyalarını görebilmek için lütfen giriş yapın veya ücretsiz kayıt olun.</p>
+                    <div class="flex gap-2 pt-1">
+                        <button type="button" onclick="closeModal('downloads-modal'); openModal('login-modal');" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition">Giriş Yap</button>
+                        <button type="button" onclick="closeModal('downloads-modal'); openModal('register-modal');" class="flex-1 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-800 transition">Kayıt Ol</button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        const isBiz = (currentUser.account_type === 'business') || (String(currentUser.email || '').toLowerCase() === 'ermananasizz@gmail.com');
+        if (sub) sub.textContent = isBiz ? 'İşletme hesabınız için PC kurulumu ve mobil uygulamalar:' : 'Müşteri hesabınız için Android mobil uygulama:';
+        const custCard = `
+            <a href="${API_BASE}/downloads/ErodeskCustomer.apk" onclick="trackFileDownload('ErodeskCustomer.apk')" class="flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/60 transition group">
+                <div class="flex items-center space-x-3">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-lg"><i class="fa-brands fa-android"></i></div>
+                    <div>
+                        <div class="text-xs font-extrabold">ErodeskCustomer.apk</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Müşteri Mobil Uygulaması (Android) • v1.0</div>
+                    </div>
+                </div>
+                <span class="px-3 py-1.5 rounded-xl bg-emerald-600 group-hover:bg-emerald-500 text-white text-[11px] font-bold">İndir</span>
+            </a>
+        `;
+        if (!isBiz) {
+            body.innerHTML = custCard;
+            return;
+        }
+        const setupCard = `
+            <a href="${API_BASE}/downloads/pc/EroDesk_Setup.exe" onclick="trackFileDownload('EroDesk_Setup.exe')" class="flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-indigo-500/40 hover:border-indigo-400 transition group">
+                <div class="flex items-center space-x-3">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-lg"><i class="fa-brands fa-windows"></i></div>
+                    <div>
+                        <div class="text-xs font-extrabold">EroDesk_Setup.exe</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Windows 10/11 Tek Kurulum (5 Sektör + Otomatik WebView2) • v1.0</div>
+                    </div>
+                </div>
+                <span class="px-3 py-1.5 rounded-xl bg-indigo-600 group-hover:bg-indigo-500 text-white text-[11px] font-bold">İndir</span>
+            </a>
+        `;
+        const bizApkCard = `
+            <a href="${API_BASE}/downloads/ErodeskBusiness.apk" onclick="trackFileDownload('ErodeskBusiness.apk')" class="flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500/60 transition group">
+                <div class="flex items-center space-x-3">
+                    <div class="w-11 h-11 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center text-lg"><i class="fa-solid fa-briefcase"></i></div>
+                    <div>
+                        <div class="text-xs font-extrabold">ErodeskBusiness.apk</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">İşletme Yönetim Mobil Uygulaması (Android) • v1.0</div>
+                    </div>
+                </div>
+                <span class="px-3 py-1.5 rounded-xl bg-sky-600 group-hover:bg-sky-500 text-white text-[11px] font-bold">İndir</span>
+            </a>
+        `;
+        body.innerHTML = setupCard + bizApkCard + custCard;
+    }
 </script>
+
+<div id="downloads-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div class="w-full max-w-md bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-extrabold flex items-center gap-2"><i class="fa-solid fa-download text-emerald-400"></i><span>Uygulamaları İndir</span></h3>
+                <p id="downloads-modal-sub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5"></p>
+            </div>
+            <button type="button" onclick="closeModal('downloads-modal')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-white flex items-center justify-center">&times;</button>
+        </div>
+        <div id="downloads-modal-body" class="space-y-2.5"></div>
+    </div>
+</div>
 </body>
 </html>
