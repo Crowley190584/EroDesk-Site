@@ -345,7 +345,7 @@
             <div id="biz-ai-panel" class="hidden bg-white dark:bg-[#131d31] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[540px]">
                 <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                        <div id="ai-chat-biz-avatar" class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 overflow-hidden">
                             <i class="fa-solid fa-robot"></i>
                         </div>
                         <div>
@@ -1076,6 +1076,7 @@
             try {
                 const res = await fetch(`${API_BASE}/api/public/conversation?business_id=${encodeURIComponent(selectedBusiness.id)}&category_id=${encodeURIComponent(catId)}&phone=${encodeURIComponent(phone)}`);
                 const d = await res.json();
+                if (d.business_avatar && selectedBusiness) selectedBusiness.avatar_url = d.business_avatar;
                 if (d.connected_app && Array.isArray(d.messages)) msgs = d.messages;
             } catch (e) {}
         }
@@ -1089,12 +1090,14 @@
             } catch (e) {}
         }
 
+        const hdrAv = document.getElementById('ai-chat-biz-avatar');
+        if (hdrAv) {
+            const bAv = selectedBusiness?.avatar_url || '';
+            hdrAv.innerHTML = bAv ? `<img src="${bAv}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-robot"></i>';
+        }
         if (msgs) {
             const c = document.getElementById('chat-messages');
-            const html = msgs.map(m => m.role === 'inbound'
-                ? `<div class="flex justify-end"><div class="bg-indigo-600 text-white rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(m.content || '')}</div></div>`
-                : `<div class="flex justify-start"><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(m.content || '')}</div></div>`
-            ).join('');
+            const html = msgs.map(m => m.role === 'inbound' ? _renderUserBubbleHtml(m.content || '') : _renderAiBubbleHtml(m.content || '')).join('');
             if (c.dataset.lastHtml !== html) {
                 c.innerHTML = html;
                 c.dataset.lastHtml = html;
@@ -1524,14 +1527,26 @@
         showToast('Sohbet temizlendi.', 'info');
     }
 
+    function _chatAvatarTag(url, fallbackChar, bgCls) {
+        if (url) return `<img src="${url}" class="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-300 dark:border-slate-700 mt-0.5">`;
+        return `<div class="w-7 h-7 rounded-full ${bgCls} text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">${escapeHtml(fallbackChar)}</div>`;
+    }
+    function _renderUserBubbleHtml(t) {
+        const fn = (currentUser?.first_name || 'M')[0].toUpperCase();
+        return `<div class="flex justify-end items-end gap-2"><div class="bg-indigo-600 text-white rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(t)}</div>${_chatAvatarTag(currentUser?.avatar_url || '', fn, 'bg-indigo-500')}</div>`;
+    }
+    function _renderAiBubbleHtml(t) {
+        const bn = (selectedBusiness?.name || 'E')[0].toUpperCase();
+        return `<div class="flex justify-start items-end gap-2">${_chatAvatarTag(selectedBusiness?.avatar_url || '', bn, 'bg-emerald-600')}<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(t)}</div></div>`;
+    }
     function appendUserMsg(t) {
         const c = document.getElementById('chat-messages');
-        c.innerHTML += `<div class="flex justify-end"><div class="bg-indigo-600 text-white rounded-2xl px-4 py-3 max-w-md text-sm">${escapeHtml(t)}</div></div>`;
+        c.innerHTML += _renderUserBubbleHtml(t);
         c.scrollTop = c.scrollHeight;
     }
     function appendAiMsg(t) {
         const c = document.getElementById('chat-messages');
-        c.innerHTML += `<div class="flex justify-start"><div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 max-w-md text-sm whitespace-pre-line">${escapeHtml(t)}</div></div>`;
+        c.innerHTML += _renderAiBubbleHtml(t);
         c.scrollTop = c.scrollHeight;
     }
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
