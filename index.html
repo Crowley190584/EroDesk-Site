@@ -2208,7 +2208,7 @@
         const isBiz = (currentUser.account_type === 'business') || (String(currentUser.email || '').toLowerCase() === 'ermananasizz@gmail.com');
         if (sub) sub.textContent = isBiz ? 'İşletme hesabınız için PC kurulumu ve mobil uygulamalar:' : 'Müşteri hesabınız için Android mobil uygulama:';
         const custCard = `
-            <a href="${API_BASE}/downloads/ErodeskCustomer.apk" onclick="trackFileDownload('ErodeskCustomer.apk')" class="flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/60 transition group">
+            <a href="${API_BASE}/downloads/ErodeskCustomer.apk" download="ErodeskCustomer.apk" onclick="trackFileDownload('ErodeskCustomer.apk')" class="flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/60 transition group">
                 <div class="flex items-center space-x-3">
                     <div class="w-11 h-11 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-lg"><i class="fa-brands fa-android"></i></div>
                     <div>
@@ -2224,19 +2224,19 @@
             return;
         }
         const setupCard = `
-            <a href="${API_BASE}/downloads/pc/EroDesk_Setup.exe" onclick="trackFileDownload('EroDesk_Setup.exe')" class="flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-indigo-500/40 hover:border-indigo-400 transition group">
+            <a href="${API_BASE}/downloads/pc/EroDesk_Setup.exe" download="EroDesk_Setup.exe" onclick="trackFileDownload('EroDesk_Setup.exe')" class="flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-indigo-500/40 hover:border-indigo-400 transition group">
                 <div class="flex items-center space-x-3">
                     <div class="w-11 h-11 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-lg"><i class="fa-brands fa-windows"></i></div>
                     <div>
                         <div class="text-xs font-extrabold">EroDesk_Setup.exe</div>
-                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Windows 10/11 Tek Kurulum (5 Sektör + Otomatik WebView2) • v1.0</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Windows 10/11 Tek Kurulum • v1.0</div>
                     </div>
                 </div>
                 <span class="px-3 py-1.5 rounded-xl bg-indigo-600 group-hover:bg-indigo-500 text-white text-[11px] font-bold">İndir</span>
             </a>
         `;
         const bizApkCard = `
-            <a href="${API_BASE}/downloads/ErodeskBusiness.apk" onclick="trackFileDownload('ErodeskBusiness.apk')" class="flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500/60 transition group">
+            <a href="${API_BASE}/downloads/ErodeskBusiness.apk" download="ErodeskBusiness.apk" onclick="trackFileDownload('ErodeskBusiness.apk')" class="flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500/60 transition group">
                 <div class="flex items-center space-x-3">
                     <div class="w-11 h-11 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center text-lg"><i class="fa-solid fa-briefcase"></i></div>
                     <div>
