@@ -334,11 +334,17 @@
                 <div id="site-cal-slots" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2"></div>
                 <div id="site-cal-services" class="hidden flex flex-col gap-2 pt-1"></div>
 
-                <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-2.5">
-                    <input id="site-cal-note" type="text" placeholder="Not : (isteğe bağlı)" class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl px-4 py-2.5 text-xs outline-none focus:border-indigo-500">
-                    <button type="button" onclick="bookSiteCalendarAppt()" class="px-5 py-2.5 rounded-2xl text-white font-bold text-xs shadow-lg transition flex items-center justify-center gap-2" style="background:#3a8165;">
-                        <i class="fa-solid fa-calendar-check"></i><span>Randevuyu Onayla</span>
-                    </button>
+                <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <input id="site-cal-name" type="text" placeholder="Ad Soyad *" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl px-4 py-2.5 text-xs outline-none focus:border-indigo-500">
+                        <input id="site-cal-phone" type="tel" placeholder="Telefon (05XX XXX XX XX) *" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl px-4 py-2.5 text-xs outline-none focus:border-indigo-500">
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2.5">
+                        <input id="site-cal-note" type="text" placeholder="Not : (isteğe bağlı)" class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl px-4 py-2.5 text-xs outline-none focus:border-indigo-500">
+                        <button type="button" onclick="bookSiteCalendarAppt()" class="px-5 py-2.5 rounded-2xl text-white font-bold text-xs shadow-lg transition flex items-center justify-center gap-2" style="background:#3a8165;">
+                            <i class="fa-solid fa-calendar-check"></i><span>Randevuyu Onayla</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -353,7 +359,7 @@
                             <div id="ai-chat-sub" class="text-[11px] text-slate-400">Doğrudan işletme gelen kutusuna entegre</div>
                         </div>
                     </div>
-                    <input id="ai-customer-phone" readonly disabled tabindex="-1" placeholder="Giriş yapınız..." class="bg-slate-800/70 border border-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-xl w-44 outline-none cursor-not-allowed select-none pointer-events-none opacity-85">
+                    <input id="ai-customer-phone" readonly disabled tabindex="-1" placeholder="Misafir Randevu" class="bg-slate-800/70 border border-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-xl w-44 outline-none cursor-not-allowed select-none pointer-events-none opacity-85">
                 </div>
 
                 <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50 dark:bg-[#0b0f19]/60"></div>
@@ -1065,10 +1071,25 @@
     const APP_PORTS = { klinikler: 5000, hairdesk: 5011, skindesk: 5012, barberdesk: 5013, theradesk: 5016 };
     let siteChatPollTimer = null;
 
+    function getSiteChatIdentity() {
+        if (currentUser?.phone && currentUser.phone.trim()) {
+            return {
+                phone: currentUser.phone.trim(),
+                name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim()
+            };
+        }
+        let gid = localStorage.getItem('erodesk_guest_chat_id');
+        if (!gid) {
+            gid = 'guest-' + Math.random().toString(36).slice(2, 10);
+            localStorage.setItem('erodesk_guest_chat_id', gid);
+        }
+        return { phone: gid, name: '' };
+    }
+
     async function loadLiveAppConversation() {
         if (!selectedBusiness || document.getElementById('ai-step-3').classList.contains('hidden')) return;
-        if (!currentUser?.phone) return;
-        const phone = currentUser.phone.trim();
+        const { phone } = getSiteChatIdentity();
+        if (!phone) return;
         const catId = selectedCategory?.id || 'klinikler';
         let msgs = null;
 
@@ -1153,7 +1174,11 @@
         document.getElementById('ai-chat-sub').innerText = `${selectedCategory?.name || ''} — Doğrudan gelen kutusuna entegre`;
         const noteEl = document.getElementById('site-cal-note');
         if (noteEl) noteEl.placeholder = getSiteNotePlaceholder(selectedCategory?.id || selectedBusiness.category_id);
-        if (currentUser && currentUser.phone) document.getElementById('ai-customer-phone').value = currentUser.phone;
+        const calNameEl = document.getElementById('site-cal-name');
+        const calPhoneEl = document.getElementById('site-cal-phone');
+        if (calNameEl && currentUser && !calNameEl.value.trim()) calNameEl.value = `${currentUser.first_name||''} ${currentUser.last_name||''}`.trim();
+        if (calPhoneEl && currentUser?.phone && !calPhoneEl.value.trim()) calPhoneEl.value = currentUser.phone;
+        document.getElementById('ai-customer-phone').value = currentUser?.phone || 'Misafir Randevu';
         chatStep = 0;
         apptData = { time: '', service: '', note: '', phone: '', name: '' };
         const c = document.getElementById('chat-messages');
@@ -1368,14 +1393,15 @@
     }
 
     async function bookSiteCalendarAppt() {
-        if (!currentUser) {
-            showToast('Randevu alabilmek için lütfen kayıt olup giriş yapın.', 'info');
-            openModal('login-modal');
-            return;
-        }
         if (!selectedBusiness) return;
         if (!siteCalSelectedHour) {
             showToast('Lütfen takvimden yeşil (uygun) bir saat seçin.', 'error');
+            return;
+        }
+        const custName = (document.getElementById('site-cal-name')?.value || (currentUser ? `${currentUser.first_name||''} ${currentUser.last_name||''}`.trim() : '')).trim();
+        const custPhone = (document.getElementById('site-cal-phone')?.value || currentUser?.phone || '').trim();
+        if (!custName || custPhone.replace(/\D/g, '').length < 10) {
+            showToast('Lütfen Ad Soyad ve geçerli bir telefon numarası girin.', 'error');
             return;
         }
         const typedNote = (document.getElementById('site-cal-note')?.value || '').trim();
@@ -1389,9 +1415,9 @@
                     day: siteCalSelectedDate,
                     hour: siteCalSelectedHour,
                     note,
-                    customer_name: `${currentUser.first_name||''} ${currentUser.last_name||''}`.trim(),
-                    customer_phone: currentUser.phone || '',
-                    customer_email: currentUser.email || ''
+                    customer_name: custName,
+                    customer_phone: custPhone,
+                    customer_email: currentUser?.email || ''
                 })
             });
             const d = await res.json();
@@ -1423,14 +1449,9 @@
         const inp = document.getElementById('chat-input');
         const txt = inp.value.trim();
         if (!txt) return;
-        if (!currentUser?.phone) {
-            showToast('Mesaj göndermek için lütfen giriş yapın veya kayıt olun.', 'error');
-            openModal('login-modal');
-            return;
-        }
+        const { phone, name: custName } = getSiteChatIdentity();
         appendUserMsg(txt);
         inp.value = '';
-        const phone = currentUser.phone.trim();
 
         const catId = selectedCategory?.id || 'klinikler';
 
@@ -1443,7 +1464,7 @@
                     business_id: selectedBusiness?.id || '',
                     business_name: selectedBusiness?.name || '',
                     customer_phone: phone,
-                    customer_name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim(),
+                    customer_name: custName,
                     message: txt
                 })
             });
@@ -1508,14 +1529,15 @@
 
     async function resetChat() {
         chatStep = 0;
-        if (isBackendOnline && selectedBusiness?.id && currentUser?.phone) {
+        const { phone } = getSiteChatIdentity();
+        if (isBackendOnline && selectedBusiness?.id && phone) {
             try {
                 await fetch(`${API_BASE}/api/public/conversation/clear`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         business_id: selectedBusiness.id,
-                        phone: currentUser.phone.trim()
+                        phone
                     })
                 });
             } catch (e) {}
@@ -1738,7 +1760,7 @@
         const actions = document.getElementById('auth-actions');
         const pill = document.getElementById('user-pill');
         const chatPhoneEl = document.getElementById('ai-customer-phone');
-        if (chatPhoneEl) chatPhoneEl.value = currentUser?.phone || '';
+        if (chatPhoneEl) chatPhoneEl.value = currentUser?.phone || 'Misafir Randevu';
         if (!currentUser) {
             actions.classList.remove('hidden');
             pill.classList.add('hidden'); pill.classList.remove('flex');
